@@ -32,6 +32,8 @@ else
     echo "目录 $bin_name 创建成功。"
 fi
 
+git submodule update --init --recursive
+
 cd $dir_name
 echo "CPU核心数为"$cpu_core", 开始编译..."
 cmake ..
