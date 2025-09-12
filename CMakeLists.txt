@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 3.1)
+set(PROJECT_NAME lonetfw)
+set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install/${PROJECT_NAME})
+project(${PROJECT_NAME})
+
+set(CMAKE_CXX_STANDARD 11)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+
+set(CMAKE_BUILD_TYPE Debug)
+
+add_definitions(-g -LINUX_X86)
+
+set(MODULARIZATION OFF CACHE BOOL "" FORCE)
+set(BUILT_TESTS OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(thirdparty/LoNetfw)
