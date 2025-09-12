@@ -1,0 +1,3 @@
+[submodule "thirdparty/LoNetfw"]
+	path = thirdparty/LoNetfw
+	url = git@github.com:TamamoLoN/LoNetfw.git
