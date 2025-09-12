@@ -32,6 +32,7 @@ else
     echo "目录 $bin_name 创建成功。"
 fi
 
+git submodule sync --recursive
 git submodule update --init --recursive
 
 cd $dir_name
