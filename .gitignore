@@ -40,5 +40,15 @@
 # debug information files
 *.dwo
 
-build/
-install/
+build/*
+*/build*/
+*/bin*/*
+bin/
+*.log
+*/.vscode/*
+.vscode/*
+*a.out
+.comate/*
+install/*
+.tmp
+*test*.cpp

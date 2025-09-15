@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
-set(PROJECT_NAME lonetfw)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install/${PROJECT_NAME})
-project(${PROJECT_NAME})
+project(lonhttpfw)
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -11,7 +10,38 @@ set(CMAKE_BUILD_TYPE Debug)
 
 add_definitions(-g -LINUX_X86)
 
+set(CMAKE_CXX_FLAGS "-std=c++11 -Wno-builtin-macro-redefined -Wno-terminate -Wno-deprecated-declarations")
+
 set(MODULARIZATION OFF CACHE BOOL "" FORCE)
-set(BUILT_TESTS OFF CACHE BOOL "" FORCE)
+# set(BUILT_TESTS OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(thirdparty/LoNetfw)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/LoNetfw
+${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+file(GLOB HTTP_SOURCES http/*.cpp)
+
+add_library(lonhttpfw SHARED ${HTTP_SOURCES})
+target_link_libraries(lonhttpfw PUBLIC lonetfw)
+if(USE_ABSOLUTE_PATH)
+else()
+    force_redefine_file_macro_for_sources(lonhttpfw)
+endif()
+
+function(add_lonhttpfw_build_target targetname)
+    add_executable(${targetname}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/${targetname}.cpp
+                )
+    target_link_libraries(${targetname} PRIVATE 
+                            lonhttpfw
+                        ) 
+    if(USE_ABSOLUTE_PATH)
+    else()
+        force_redefine_file_macro_for_sources(${targetname})
+    endif()
+endfunction()
+
+if(BUILT_TESTS)
+    add_lonhttpfw_build_target(test_http)
+endif()
