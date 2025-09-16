@@ -15,14 +15,22 @@ set(CMAKE_CXX_FLAGS "-std=c++11 -Wno-builtin-macro-redefined -Wno-terminate -Wno
 set(MODULARIZATION OFF CACHE BOOL "" FORCE)
 # set(BUILT_TESTS OFF CACHE BOOL "" FORCE)
 
+set(MONGREL2_HTTP_PARSER ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/mongrel2-http11/)
+
 add_subdirectory(thirdparty/LoNetfw)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/LoNetfw
 ${CMAKE_CURRENT_SOURCE_DIR}
+${MONGREL2_HTTP_PARSER}/
 )
 
-file(GLOB HTTP_SOURCES http/*.cpp)
+file(GLOB HTTP_SOURCES 
+http/*.cpp
+${MONGREL2_HTTP_PARSER}/*.cpp
+${MONGREL2_HTTP_PARSER}/*.c
+)
 
-add_library(lonhttpfw SHARED ${HTTP_SOURCES})
+add_library(lonhttpfw SHARED ${HTTP_SOURCES}
+)
 target_link_libraries(lonhttpfw PUBLIC lonetfw)
 if(USE_ABSOLUTE_PATH)
 else()
