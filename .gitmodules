@@ -1,3 +1,6 @@
 [submodule "thirdparty/LoNetfw"]
 	path = thirdparty/LoNetfw
 	url = git@github.com:TamamoLoN/LoNetfw.git
+[submodule "thirdparty/mongrel2"]
+	path = thirdparty/mongrel2
+	url = git@github.com:mongrel2/mongrel2.git
