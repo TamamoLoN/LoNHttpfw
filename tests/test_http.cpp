@@ -1,4 +1,5 @@
 #include "http/http.h"
+#include "http/httpparser.h"
 #include "http/httprequest.h"
 #include "http/httpresponse.h"
 
@@ -36,6 +37,7 @@ void test_response()
 
 int main(int argc, char const *argv[])
 {
+    lon::config::Config::parseFromYaml("./.config/log.yaml");
     test_request();
     test_response();
     return 0;
