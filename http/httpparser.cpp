@@ -8,10 +8,22 @@ HttpParser::HttpParser() : m_error(0) {}
 
 HttpMessage::Ptr HttpParser::parse(char *data, size_t len)
 {
-    if (execute(data, len) == -1)
+    size_t ret = execute(data, len);
+    if (LON_UNLIKELY(ret == static_cast<size_t>(-1)))
     {
         LON_ERROR(LON_LOG_ROOT) << "HttpParser::parse error: " << m_error;
+        return nullptr;
     }
+    if (LON_LIKELY(ret < len))
+    {
+        std::string body(data + ret, len - ret);
+        m_handler->setBody(std::move(body));
+    }
+    else
+    {
+        m_handler->setBody("");
+    }
+
     return m_handler;
 }
 
