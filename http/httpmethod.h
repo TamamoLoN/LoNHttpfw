@@ -63,9 +63,9 @@ enum class HttpMethod
 class HttpMethodConverter
 {
   public:
-    static HttpMethod fromString(const std::string &status);
-    static HttpMethod fromString(const char *status);
-    static std::string toString(HttpMethod status);
+    static HttpMethod fromString(const std::string &method);
+    static HttpMethod fromString(const char *method);
+    static std::string toString(HttpMethod method);
 };
 
 } // namespace http

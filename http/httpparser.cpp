@@ -6,11 +6,26 @@ namespace http
 {
 HttpParser::HttpParser() : m_error(0) {}
 
+HttpMessage::Ptr HttpParser::parse(char *data, size_t len)
+{
+    if (execute(data, len) == -1)
+    {
+        LON_ERROR(LON_LOG_ROOT) << "HttpParser::parse error: " << m_error;
+    }
+    return m_handler;
+}
+
+size_t HttpParser::getContentLength() const
+{
+    return m_handler->getHeader<size_t>("Content-Length", 0);
+}
+
 void HttpParser::setError(int32_t error) { m_error = error; }
 
 HttpRequestParser::HttpRequestParser() : HttpParser()
 {
-    m_request = std::make_shared<HttpRequest>();
+    m_handler = std::make_shared<HttpRequest>();
+    m_request = std::static_pointer_cast<HttpRequest>(m_handler);
     http_parser_init(&m_parser);
     m_parser.request_method = onRequestMethod;
     m_parser.request_uri    = onRequestUri;
@@ -25,7 +40,7 @@ HttpRequestParser::HttpRequestParser() : HttpParser()
 
 HttpRequestParser::~HttpRequestParser() { http_parser_finish(&m_parser); }
 
-size_t HttpRequestParser::parse(char *data, size_t len)
+size_t HttpRequestParser::execute(char *data, size_t len)
 {
     // ret: 实际解析了多少，-1表示出错
     size_t ret = http_parser_execute(&m_parser, data, len, 0);
@@ -110,7 +125,8 @@ void HttpRequestParser::onRequestHttpField(void *data, const char *field, size_t
 
 HttpResponseParser::HttpResponseParser() : HttpParser()
 {
-    m_response = std::make_shared<HttpResponse>();
+    m_handler  = std::make_shared<HttpResponse>();
+    m_response = std::static_pointer_cast<HttpResponse>(m_handler);
     httpclient_parser_init(&m_parser);
     m_parser.reason_phrase = onResponseReasonPhrase;
     m_parser.status_code   = onResponseStatusCode;
@@ -124,29 +140,75 @@ HttpResponseParser::HttpResponseParser() : HttpParser()
 
 HttpResponseParser::~HttpResponseParser() { httpclient_parser_finish(&m_parser); }
 
-size_t HttpResponseParser::parse(char *data, size_t len) { return 0; }
+size_t HttpResponseParser::execute(char *data, size_t len)
+{
+    size_t ret = httpclient_parser_execute(&m_parser, data, len, 0);
+    memmove((void *)data, data + ret, len - ret);
 
-int32_t HttpResponseParser::finished() { return 0; }
+    return ret;
+}
+
+int32_t HttpResponseParser::finished() { return httpclient_parser_finish(&m_parser); }
 
 int32_t HttpResponseParser::error() { return m_error || httpclient_parser_has_error(&m_parser); }
 
-void HttpResponseParser::onResponseReasonPhrase(void *data, const char *at, size_t length) {}
+void HttpResponseParser::onResponseReasonPhrase(void *data, const char *at, size_t length)
+{
+    auto parser = static_cast<HttpResponseParser *>(data);
+    parser->m_response->setReason(std::string(at, length));
+}
 
-void HttpResponseParser::onResponseStatusCode(void *data, const char *at, size_t length) {}
+void HttpResponseParser::onResponseStatusCode(void *data, const char *at, size_t length)
+{
+    auto parser = static_cast<HttpResponseParser *>(data);
+    // auto status = HttpStatusConverter::fromString(at);
+    // std::cout << "1111status=" << (int)status << std::endl;
+    // if (status == HttpStatus::UNKNOWN)
+    // {
+    //     LON_WARN(LON_LOG_ROOT) << "Unknown HTTP status: " << at;
+    //     parser->setError((int32_t)HttpParserError::UNKNOWN_STATUS);
+    //     return;
+    // }
+    HttpStatus status = (HttpStatus)(atoi(at));
+    parser->m_response->setStatus(status);
+}
 
 void HttpResponseParser::onResponseChunkSize(void *data, const char *at, size_t length) {}
 
-void HttpResponseParser::onResponseHttpVersion(void *data, const char *at, size_t length) {}
+void HttpResponseParser::onResponseHttpVersion(void *data, const char *at, size_t length)
+{
+    auto parser = static_cast<HttpResponseParser *>(data);
+    if (strncmp(at, "HTTP/1.0", length) == 0)
+    {
+        parser->m_response->setVersion(0x10);
+    }
+    else if (strncmp(at, "HTTP/1.1", length) == 0)
+    {
+        parser->m_response->setVersion(0x11);
+    }
+    else
+    {
+        LON_WARN(LON_LOG_ROOT) << "Unknown HTTP version: " << at;
+        parser->setError((int32_t)HttpParserError::UNKNOWN_VERSION);
+        return;
+    }
+}
 
 void HttpResponseParser::onResponseHeaderDone(void *data, const char *at, size_t length) {}
-
-void HttpResponseParser::onRequestHttpVersion(void *data, const char *at, size_t length) {}
 
 void HttpResponseParser::onResponseLastChunk(void *data, const char *at, size_t length) {}
 
 void HttpResponseParser::onResponseHttpField(void *data, const char *field, size_t flen,
                                              const char *value, size_t vlen)
 {
+    auto parser = static_cast<HttpResponseParser *>(data);
+    if (flen == 0)
+    {
+        LON_WARN(LON_LOG_ROOT) << "Invalid HTTP field: ";
+        parser->setError((int32_t)HttpParserError::INVALID_FIELD);
+        return;
+    }
+    parser->m_response->setHeader(std::string(field, flen), std::string(value, vlen));
 }
 
 } // namespace http

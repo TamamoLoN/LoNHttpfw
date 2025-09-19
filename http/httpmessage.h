@@ -11,6 +11,7 @@ namespace http
 class HttpMessage
 {
   public:
+    using Ptr     = std::shared_ptr<HttpMessage>;
     using MapType = std::map<std::string, std::string, util::InsensitiveStringCompare>;
     HttpMessage(uint8_t version = 0x11, bool close = true);
     ~HttpMessage();
@@ -45,29 +46,25 @@ class HttpMessage
   public:
   public:
     template <typename T>
-    bool getCheckHeader(const MapType &map, const std::string &key, T &out,
-                        const T &default_value = T())
+    bool getCheckHeader(const std::string &key, T &out, const T &default_value = T())
     {
-        return getCheckHelper(map, key, out, default_value);
+        return getCheckHelper(m_headers, key, out, default_value);
+    }
+
+    template <typename T> T getHeader(const std::string &key, const T &default_value = T())
+    {
+        return getHelper(m_headers, key, default_value);
     }
 
     template <typename T>
-    bool getHeader(const MapType &map, const std::string &key, const T &default_value = T())
+    bool getCheckCookie(const std::string &key, T &out, const T &default_value = T())
     {
-        return getHelper(map, key, default_value);
+        return getCheckHelper(m_cookies, key, out, default_value);
     }
 
-    template <typename T>
-    bool getCheckCookie(const MapType &map, const std::string &key, T &out,
-                        const T &default_value = T())
+    template <typename T> T getCookie(const std::string &key, const T &default_value = T())
     {
-        return getCheckHelper(map, key, out, default_value);
-    }
-
-    template <typename T>
-    bool getCookie(const MapType &map, const std::string &key, const T &default_value = T())
-    {
-        return getHelper(map, key, default_value);
+        return getHelper(m_cookies, key, default_value);
     }
 
   protected:

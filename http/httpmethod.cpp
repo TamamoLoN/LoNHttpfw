@@ -23,14 +23,14 @@ std::string HttpMethodConverter::toString(HttpMethod status)
     }
 }
 
-HttpMethod HttpMethodConverter::fromString(const char *status)
+HttpMethod HttpMethodConverter::fromString(const char *method)
 {
-    if (status == nullptr)
+    if (method == nullptr)
     {
         return HttpMethod::UNKNOWN;
     }
 #define XX(code, name, describe)                                                                   \
-    else if (strcmp(status, #name) == 0) { return HttpMethod::name; }
+    else if (strncmp(#describe, method, strlen(#describe)) == 0) { return HttpMethod::name; }
     HTTP_METHOD_MAP(XX)
 #undef XX
     else { return HttpMethod::UNKNOWN; }

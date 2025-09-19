@@ -48,16 +48,14 @@ class HttpRequest : public HttpMessage
 
   public:
     template <typename T>
-    bool getCheckParam(const MapType &map, const std::string &key, T &out,
-                       const T &default_value = T())
+    bool getCheckParam(const std::string &key, T &out, const T &default_value = T())
     {
-        return getCheckHelper(map, key, out, default_value);
+        return getCheckHelper(m_params, key, out, default_value);
     }
 
-    template <typename T>
-    bool getParam(const MapType &map, const std::string &key, const T &default_value = T())
+    template <typename T> T getParam(const std::string &key, const T &default_value = T())
     {
-        return getHelper(map, key, default_value);
+        return getHelper(m_params, key, default_value);
     }
 
   private:
