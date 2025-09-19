@@ -10,14 +10,22 @@ namespace lon
 {
 namespace http
 {
+enum class HttpParserError
+{
+    OK             = 0,
+    UNKNOWN_METHOD = 0x1000,
+    UNKNOWN_VERSION,
+    INVALID_FIELD,
+};
+
 class HttpParser
 {
   public:
-    HttpParser()                                                          = default;
-    virtual ~HttpParser()                                                 = default;
-    virtual size_t parse(const char *data, size_t len, size_t offset = 0) = 0;
-    virtual int32_t finished() const                                      = 0;
-    int32_t error() const;
+    HttpParser();
+    virtual ~HttpParser()                        = default;
+    virtual size_t parse(char *data, size_t len) = 0;
+    virtual int32_t finished()                   = 0;
+    virtual int32_t error()                      = 0;
     void setError(int32_t error);
 
   protected:
@@ -30,8 +38,16 @@ class HttpRequestParser : public HttpParser
     using Ptr = std::shared_ptr<HttpRequestParser>;
     HttpRequestParser();
     ~HttpRequestParser();
-    size_t parse(const char *data, size_t len, size_t offset = 0) override;
-    int32_t finished() const override;
+    /**
+     * @brief 解析HTTP请求
+     * @param data 待解析的数据
+     * @param len 待解析数据的长度
+     * @return size_t 实际解析了多少，-1表示出错, 1表示成功,
+     * >0表示已处理的字节数
+     */
+    size_t parse(char *data, size_t len) override;
+    int32_t finished() override;
+    int32_t error() override;
 
   private:
     static void onRequestMethod(void *data, const char *at, size_t length);
@@ -55,8 +71,9 @@ class HttpResponseParser : public HttpParser
     using Ptr = std::shared_ptr<HttpResponseParser>;
     HttpResponseParser();
     ~HttpResponseParser();
-    size_t parse(const char *data, size_t len, size_t offset = 0) override;
-    int32_t finished() const override;
+    size_t parse(char *data, size_t len) override;
+    int32_t finished() override;
+    int32_t error() override;
 
   private:
     static void onResponseReasonPhrase(void *data, const char *at, size_t length);
