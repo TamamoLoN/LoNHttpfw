@@ -277,6 +277,7 @@ int http_parser_init(http_parser *parser) {
 size_t http_parser_execute(http_parser *parser, const char *buffer, size_t len, size_t off)  
 {
   if(len == 0) return 0;
+  parser->nread = 0;
 
   const char *p, *pe;
   int cs = parser->cs;

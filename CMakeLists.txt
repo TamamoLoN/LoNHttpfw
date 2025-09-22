@@ -52,4 +52,5 @@ endfunction()
 
 if(BUILT_TESTS)
     add_lonhttpfw_build_target(test_http)
+    add_lonhttpfw_build_target(test_http_server)
 endif()

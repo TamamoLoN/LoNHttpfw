@@ -1,5 +1,10 @@
 #pragma once
-#include "lonetfw/lonetfw.h"
+#include "http/httpglobalconfig.h"
+#include "http/httpparser.h"
+#include "http/httprequest.h"
+#include "http/httpresponse.h"
+#include "http/httpserver.h"
+#include "http/httpsession.h"
 
 namespace lon
 {
