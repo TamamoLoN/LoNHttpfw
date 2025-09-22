@@ -77,5 +77,7 @@ bool HttpMessage::hasCookie(const std::string &key, std::string &value) const
 void HttpMessage::delHeader(const std::string &key) { m_headers.erase(key); }
 
 void HttpMessage::delCookie(const std::string &key) { m_cookies.erase(key); }
+
+std::ostream &operator<<(std::ostream &os, const HttpMessage &msg) { return msg.toString(os); }
 } // namespace http
 } // namespace lon

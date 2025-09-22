@@ -30,9 +30,10 @@ class HttpParser
     HttpMessage::Ptr parse(char *data, size_t len);
     size_t getContentLength() const;
     void setError(int32_t error);
+    HttpMessage::Ptr getData() const;
 
   protected:
-    HttpMessage::Ptr m_handler;
+    HttpMessage::Ptr m_data;
     int32_t m_error;
 };
 

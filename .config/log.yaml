@@ -23,7 +23,9 @@ fiber:
       stack_size: 131072
 tcp:
       connect:
-            timeout: 5000
+            timeout: 3000
+      server:
+            client_timeout: 120000
 http:
       request:
             buffer_size: 4096

@@ -17,27 +17,29 @@ HttpMessage::Ptr HttpParser::parse(char *data, size_t len)
     if (LON_LIKELY(ret < len))
     {
         std::string body(data + ret, len - ret);
-        m_handler->setBody(std::move(body));
+        m_data->setBody(std::move(body));
     }
     else
     {
-        m_handler->setBody("");
+        m_data->setBody("");
     }
 
-    return m_handler;
+    return m_data;
 }
 
 size_t HttpParser::getContentLength() const
 {
-    return m_handler->getHeader<size_t>("Content-Length", 0);
+    return m_data->getHeader<size_t>("Content-Length", 0);
 }
 
 void HttpParser::setError(int32_t error) { m_error = error; }
 
+HttpMessage::Ptr HttpParser::getData() const { return m_data; }
+
 HttpRequestParser::HttpRequestParser() : HttpParser()
 {
-    m_handler = std::make_shared<HttpRequest>();
-    m_request = std::static_pointer_cast<HttpRequest>(m_handler);
+    m_data    = std::make_shared<HttpRequest>();
+    m_request = std::static_pointer_cast<HttpRequest>(m_data);
     http_parser_init(&m_parser);
     m_parser.request_method = onRequestMethod;
     m_parser.request_uri    = onRequestUri;
@@ -137,8 +139,8 @@ void HttpRequestParser::onRequestHttpField(void *data, const char *field, size_t
 
 HttpResponseParser::HttpResponseParser() : HttpParser()
 {
-    m_handler  = std::make_shared<HttpResponse>();
-    m_response = std::static_pointer_cast<HttpResponse>(m_handler);
+    m_data     = std::make_shared<HttpResponse>();
+    m_response = std::static_pointer_cast<HttpResponse>(m_data);
     httpclient_parser_init(&m_parser);
     m_parser.reason_phrase = onResponseReasonPhrase;
     m_parser.status_code   = onResponseStatusCode;

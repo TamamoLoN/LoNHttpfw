@@ -42,6 +42,7 @@ class HttpMessage
 
     virtual std::ostream &toString(std::ostream &os) const = 0;
     virtual std::string toString() const                   = 0;
+    friend std::ostream &operator<<(std::ostream &os, const HttpMessage &msg);
 
   public:
   public:
