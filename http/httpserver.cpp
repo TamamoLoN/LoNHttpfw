@@ -12,6 +12,7 @@ HttpServer::HttpServer(scheduler::IOScheduler *scheduler, scheduler::IOScheduler
 
 void HttpServer::handleClient(const net::Socket::Ptr &client)
 {
+    LON_INFO(LON_LOG_ROOT) << "[" << getName() << "] handle client, client=" << client->toString();
     auto session = std::make_shared<HttpSession>(
         client, true, HttpGlobalConfig::Instance().config_http->getData().request.buffer_size);
 
@@ -28,6 +29,8 @@ void HttpServer::handleClient(const net::Socket::Ptr &client)
         auto response = std::make_shared<HttpResponse>(request->getVersion(),
                                                        request->isClose() || !m_keepalive);
         response->setBody("hello lon\n");
+        LON_DEBUG(LON_LOG_ROOT) << "[" << getName() << "] recv http request =" << *request;
+        LON_DEBUG(LON_LOG_ROOT) << "[" << getName() << "] send http response=" << *response;
         session->sendResponse(response);
     } while (m_keepalive);
 
