@@ -15,7 +15,7 @@ std::string HttpStatusConverter::toString(HttpStatus status)
     {
 #define XX(code, name, describe)                                                                   \
     case HttpStatus::name:                                                                         \
-        return #name;
+        return #describe;
         HTTP_STATUS_MAP(XX)
 #undef XX
     default:
@@ -30,7 +30,7 @@ HttpStatus HttpStatusConverter::fromString(const char *status)
         return HttpStatus::UNKNOWN;
     }
 #define XX(code, name, describe)                                                                   \
-    else if (strcmp(status, #name) == 0) { return HttpStatus::name; }
+    else if (strcmp(status, #describe) == 0) { return HttpStatus::name; }
     HTTP_STATUS_MAP(XX)
 #undef XX
     else { return HttpStatus::UNKNOWN; }
