@@ -131,7 +131,7 @@ void HttpRequestParser::onRequestHttpField(void *data, const char *field, size_t
     if (flen == 0)
     {
         LON_WARN(LON_LOG_ROOT) << "Invalid HTTP field: ";
-        parser->setError((int32_t)HttpParserError::INVALID_FIELD);
+        // parser->setError((int32_t)HttpParserError::INVALID_FIELD);
         return;
     }
     parser->m_request->setHeader(std::string(field, flen), std::string(value, vlen));
@@ -219,7 +219,7 @@ void HttpResponseParser::onResponseHttpField(void *data, const char *field, size
     if (flen == 0)
     {
         LON_WARN(LON_LOG_ROOT) << "Invalid HTTP field: ";
-        parser->setError((int32_t)HttpParserError::INVALID_FIELD);
+        // parser->setError((int32_t)HttpParserError::INVALID_FIELD);
         return;
     }
     parser->m_response->setHeader(std::string(field, flen), std::string(value, vlen));
