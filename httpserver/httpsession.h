@@ -17,7 +17,7 @@ class HttpSession : public net::SocketStream
     virtual ~HttpSession();
 
     http::HttpRequest::Ptr recvRequest();
-    size_t sendResponse(const http::HttpResponse::Ptr &response);
+    ssize_t sendResponse(const http::HttpResponse::Ptr &response);
 
   private:
     size_t m_buffer_size;

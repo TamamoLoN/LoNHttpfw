@@ -5,17 +5,18 @@ namespace lon
 {
 namespace http
 {
-struct HttpRequestConfig
+struct HttpRequestResponseConfig
 {
-    explicit HttpRequestConfig(size_t buffer_size = 1024 * 4ull, size_t body_size = 1024 * 1024ull)
+    explicit HttpRequestResponseConfig(size_t buffer_size = 1024 * 4ull,
+                                       size_t body_size   = 1024 * 1024ull)
         : buffer_size(buffer_size), body_size(body_size)
     {
     }
-    bool operator==(const HttpRequestConfig &other) const
+    bool operator==(const HttpRequestResponseConfig &other) const
     {
         return buffer_size == other.buffer_size && body_size == other.body_size;
     }
-    bool operator<(const HttpRequestConfig &other) const
+    bool operator<(const HttpRequestResponseConfig &other) const
     {
         return buffer_size < other.buffer_size && body_size < other.body_size;
     }
@@ -25,10 +26,21 @@ struct HttpRequestConfig
 
 struct HttpConfig
 {
-    explicit HttpConfig(HttpRequestConfig request = HttpRequestConfig()) : request(request) {}
-    bool operator==(const HttpConfig &other) const { return request == other.request; }
-    bool operator<(const HttpConfig &other) const { return request < other.request; }
-    HttpRequestConfig request;
+    explicit HttpConfig(HttpRequestResponseConfig request  = HttpRequestResponseConfig(),
+                        HttpRequestResponseConfig response = HttpRequestResponseConfig())
+        : request(request), response(response)
+    {
+    }
+    bool operator==(const HttpConfig &other) const
+    {
+        return request == other.request && response == other.response;
+    }
+    bool operator<(const HttpConfig &other) const
+    {
+        return request < other.request && response < other.response;
+    }
+    HttpRequestResponseConfig request;
+    HttpRequestResponseConfig response;
 };
 
 struct HttpGlobalConfig
@@ -54,13 +66,13 @@ static auto http_global_conifg = HttpGlobalConfig::Instance();
 
 } // namespace http
 
-template <> class util::LexicalCast<http::HttpRequestConfig, std::string>
+template <> class util::LexicalCast<http::HttpRequestResponseConfig, std::string>
 {
   public:
-    http::HttpRequestConfig operator()(const std::string &source) const
+    http::HttpRequestResponseConfig operator()(const std::string &source) const
     {
         YAML::Node node = YAML::Load(source);
-        http::HttpRequestConfig res;
+        http::HttpRequestResponseConfig res;
         std::stringstream ss;
         if (node["buffer_size"].IsDefined())
             res.buffer_size = node["buffer_size"].as<size_t>();
@@ -70,10 +82,10 @@ template <> class util::LexicalCast<http::HttpRequestConfig, std::string>
     }
 };
 
-template <> class util::LexicalCast<std::string, http::HttpRequestConfig>
+template <> class util::LexicalCast<std::string, http::HttpRequestResponseConfig>
 {
   public:
-    std::string operator()(const http::HttpRequestConfig &source) const
+    std::string operator()(const http::HttpRequestResponseConfig &source) const
     {
         YAML::Node node;
         node["buffer_size"] = source.buffer_size;
@@ -93,8 +105,17 @@ template <> class util::LexicalCast<http::HttpConfig, std::string>
         http::HttpConfig res;
         std::stringstream ss;
         if (node["request"].IsDefined())
+        {
+            std::stringstream ss;
             ss << node["request"];
-        res.request = LexicalCast<http::HttpRequestConfig, std::string>()(ss.str());
+            res.request = LexicalCast<http::HttpRequestResponseConfig, std::string>()(ss.str());
+        }
+        if (node["response"].IsDefined())
+        {
+            std::stringstream ss;
+            ss << node["response"];
+            res.response = LexicalCast<http::HttpRequestResponseConfig, std::string>()(ss.str());
+        }
         return res;
     }
 };
@@ -105,7 +126,10 @@ template <> class util::LexicalCast<std::string, http::HttpConfig>
     std::string operator()(const http::HttpConfig &source) const
     {
         YAML::Node node;
-        node["request"] = LexicalCast<std::string, http::HttpRequestConfig>()(source.request);
+        node["request"] =
+            LexicalCast<std::string, http::HttpRequestResponseConfig>()(source.request);
+        node["response"] =
+            LexicalCast<std::string, http::HttpRequestResponseConfig>()(source.response);
         std::stringstream ss;
         ss << node;
         return ss.str();

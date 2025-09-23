@@ -48,19 +48,22 @@ http::HttpRequest::Ptr HttpSession::recvRequest()
     if (content_len > 0)
     {
         std::string body;
-        body.reserve(content_len);
+        body.resize(content_len);
+        ssize_t len = 0;
         if (content_len >= offset)
         {
-            body.append(data, offset);
+            memcpy(&body[0], data, offset);
+            len = offset;
         }
         else
         {
-            body.append(data, content_len);
+            memcpy(&body[0], data, content_len);
+            len = content_len;
         }
         content_len -= offset;
         if (content_len > 0)
         {
-            if (readF(&body[body.size()], content_len) <= 0)
+            if (readF(&body[len], content_len) <= 0)
             {
                 return nullptr;
             }
@@ -70,7 +73,7 @@ http::HttpRequest::Ptr HttpSession::recvRequest()
     return std::static_pointer_cast<http::HttpRequest>(parser->getData());
 }
 
-size_t HttpSession::sendResponse(const http::HttpResponse::Ptr &response)
+ssize_t HttpSession::sendResponse(const http::HttpResponse::Ptr &response)
 {
     std::stringstream ss;
     ss << *response;

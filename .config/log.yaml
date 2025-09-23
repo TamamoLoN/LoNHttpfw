@@ -30,3 +30,6 @@ http:
       request:
             buffer_size: 4096
             body_size: 1048576
+      response:
+            buffer_size: 4096
+            body_size: 1048576
