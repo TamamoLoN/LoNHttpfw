@@ -4,6 +4,7 @@
 #include "http/httpresponse.h"
 #include "httpserver/httpsession.h"
 #include "thread/mutex.h"
+#include <fnmatch.h>
 
 namespace lon
 {
