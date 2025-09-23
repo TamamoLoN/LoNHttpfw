@@ -6,7 +6,8 @@ namespace httpserver
 {
 HttpServer::HttpServer(scheduler::IOScheduler *scheduler, scheduler::IOScheduler *accept_scheduler,
                        size_t client_timeout, const std::string &name, bool keepalive)
-    : TcpServer(scheduler, accept_scheduler, client_timeout, name), m_keepalive(keepalive)
+    : TcpServer(scheduler, accept_scheduler, client_timeout, name), m_keepalive(keepalive),
+      m_dispatch(std::make_shared<HttpServletDispatch>())
 {
 }
 
@@ -29,7 +30,7 @@ void HttpServer::handleClient(const net::Socket::Ptr &client)
         }
         auto response = std::make_shared<http::HttpResponse>(request->getVersion(),
                                                              request->isClose() || !m_keepalive);
-        response->setBody("hello lon\n");
+        m_dispatch->handle(request, response, session);
         LON_DEBUG(LON_LOG_ROOT) << "[" << getName() << "] recv http request =" << *request;
         LON_DEBUG(LON_LOG_ROOT) << "[" << getName() << "] send http response=" << *response;
         session->sendResponse(response);
@@ -37,5 +38,10 @@ void HttpServer::handleClient(const net::Socket::Ptr &client)
 
     session->close();
 }
+
+void HttpServer::setDispatch(const HttpServletDispatch::Ptr &dispatch) { m_dispatch = dispatch; }
+
+HttpServletDispatch::Ptr HttpServer::getDispatch() { return m_dispatch; }
+
 } // namespace httpserver
 } // namespace lon

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "httpserver/httpservlet.h"
 #include "httpserver/httpsession.h"
 #include "server/tcpserver.h"
 
@@ -17,8 +18,12 @@ class HttpServer : public server::TcpServer
                bool keepalive = false);
     void handleClient(const net::Socket::Ptr &client) override;
 
+    void setDispatch(const HttpServletDispatch::Ptr &dispatch);
+    HttpServletDispatch::Ptr getDispatch();
+
   private:
     bool m_keepalive;
+    HttpServletDispatch::Ptr m_dispatch;
 };
 } // namespace httpserver
 } // namespace lon
