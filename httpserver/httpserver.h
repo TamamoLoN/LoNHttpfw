@@ -1,11 +1,11 @@
 #pragma once
 
-#include "http/httpsession.h"
+#include "httpserver/httpsession.h"
 #include "server/tcpserver.h"
 
 namespace lon
 {
-namespace http
+namespace httpserver
 {
 class HttpServer : public server::TcpServer
 {
@@ -20,5 +20,5 @@ class HttpServer : public server::TcpServer
   private:
     bool m_keepalive;
 };
-} // namespace http
+} // namespace httpserver
 } // namespace lon

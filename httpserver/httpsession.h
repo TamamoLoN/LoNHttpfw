@@ -7,7 +7,7 @@
 
 namespace lon
 {
-namespace http
+namespace httpserver
 {
 class HttpSession : public net::SocketStream
 {
@@ -16,11 +16,11 @@ class HttpSession : public net::SocketStream
     HttpSession(const net::Socket::Ptr &socket, bool proxy = true, size_t buffer_size = 4096);
     virtual ~HttpSession();
 
-    HttpRequest::Ptr recvRequest();
-    size_t sendResponse(const HttpResponse::Ptr &response);
+    http::HttpRequest::Ptr recvRequest();
+    size_t sendResponse(const http::HttpResponse::Ptr &response);
 
   private:
     size_t m_buffer_size;
 };
-} // namespace http
+} // namespace httpserver
 } // namespace lon

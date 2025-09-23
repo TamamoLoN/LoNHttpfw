@@ -25,6 +25,7 @@ ${MONGREL2_HTTP_PARSER}/
 
 file(GLOB HTTP_SOURCES 
 http/*.cpp
+httpserver/*.cpp
 ${MONGREL2_HTTP_PARSER}/*.cpp
 ${MONGREL2_HTTP_PARSER}/*.c
 )

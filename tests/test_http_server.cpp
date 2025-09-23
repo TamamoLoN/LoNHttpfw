@@ -1,4 +1,4 @@
-#include "http/http.h"
+#include "lonhttpfw/lonhttpfw.h"
 
 void test_http_server()
 {
@@ -9,7 +9,7 @@ void test_http_server()
 
     std::vector<lon::net::Address::Ptr> addrs;
     addrs.push_back(addr);
-    auto server = std::make_shared<lon::http::HttpServer>(
+    auto server = std::make_shared<lon::httpserver::HttpServer>(
         lon::scheduler::IOScheduler::getThis(), lon::scheduler::IOScheduler::getThis(),
         lon::config::GlobalConfig::Instance().config_tcp_server_client_timeout->getData(),
         "http_server", false);

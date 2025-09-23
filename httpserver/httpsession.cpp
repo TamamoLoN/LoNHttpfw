@@ -1,8 +1,8 @@
-#include "http/httpsession.h"
+#include "httpserver/httpsession.h"
 
 namespace lon
 {
-namespace http
+namespace httpserver
 {
 HttpSession::HttpSession(const net::Socket::Ptr &socket, bool proxy, size_t buffer_size)
     : net::SocketStream(socket, proxy), m_buffer_size(buffer_size)
@@ -11,9 +11,9 @@ HttpSession::HttpSession(const net::Socket::Ptr &socket, bool proxy, size_t buff
 
 HttpSession::~HttpSession() {}
 
-HttpRequest::Ptr HttpSession::recvRequest()
+http::HttpRequest::Ptr HttpSession::recvRequest()
 {
-    auto parser      = std::make_shared<HttpRequestParser>();
+    auto parser      = std::make_shared<http::HttpRequestParser>();
     auto buffer_size = m_buffer_size;
     std::shared_ptr<char> buffer(new char[buffer_size](), [](char *ptr) {
         delete[] ptr;
@@ -67,15 +67,15 @@ HttpRequest::Ptr HttpSession::recvRequest()
         }
         parser->getData()->setBody(body);
     }
-    return std::static_pointer_cast<HttpRequest>(parser->getData());
+    return std::static_pointer_cast<http::HttpRequest>(parser->getData());
 }
 
-size_t HttpSession::sendResponse(const HttpResponse::Ptr &response)
+size_t HttpSession::sendResponse(const http::HttpResponse::Ptr &response)
 {
     std::stringstream ss;
     ss << *response;
     auto str = ss.str();
     return writeF(str.c_str(), str.size());
 }
-} // namespace http
+} // namespace httpserver
 } // namespace lon
