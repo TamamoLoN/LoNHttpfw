@@ -55,4 +55,20 @@ if(BUILT_TESTS)
     add_lonhttpfw_build_target(test_http)
     add_lonhttpfw_build_target(test_http_server)
     add_lonhttpfw_build_target(test_http_client)
+    add_lonhttpfw_build_target(test_http_uri)
 endif()
+
+install(TARGETS lonhttpfw
+            ARCHIVE DESTINATION lib 
+            LIBRARY DESTINATION lib 
+            RUNTIME DESTINATION bin)
+
+install(DIRECTORY 
+        http
+        httpserver
+        lonhttpfw
+        DESTINATION include
+        FILES_MATCHING
+        PATTERN "*.h"
+        PATTERN "*.hpp"
+)
