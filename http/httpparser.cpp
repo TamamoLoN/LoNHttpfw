@@ -67,6 +67,8 @@ int32_t HttpRequestParser::finished() { return http_parser_finish(&m_parser); }
 
 int32_t HttpRequestParser::error() { return m_error || http_parser_has_error(&m_parser); }
 
+const http_parser &HttpRequestParser::getParser() const { return m_parser; }
+
 void HttpRequestParser::onRequestMethod(void *data, const char *at, size_t length)
 {
     auto parser = static_cast<HttpRequestParser *>(data);
@@ -165,6 +167,8 @@ size_t HttpResponseParser::execute(char *data, size_t len)
 int32_t HttpResponseParser::finished() { return httpclient_parser_finish(&m_parser); }
 
 int32_t HttpResponseParser::error() { return m_error || httpclient_parser_has_error(&m_parser); }
+
+const httpclient_parser &HttpResponseParser::getParser() const { return m_parser; }
 
 void HttpResponseParser::onResponseReasonPhrase(void *data, const char *at, size_t length)
 {

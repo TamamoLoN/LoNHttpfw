@@ -53,6 +53,7 @@ class HttpRequestParser : public HttpParser
     size_t execute(char *data, size_t len) override;
     int32_t finished() override;
     int32_t error() override;
+    const http_parser &getParser() const;
 
   private:
     static void onRequestMethod(void *data, const char *at, size_t length);
@@ -86,6 +87,7 @@ class HttpResponseParser : public HttpParser
     size_t execute(char *data, size_t len) override;
     int32_t finished() override;
     int32_t error() override;
+    const httpclient_parser &getParser() const;
 
   private:
     static void onResponseReasonPhrase(void *data, const char *at, size_t length);
