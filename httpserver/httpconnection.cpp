@@ -15,28 +15,34 @@ http::HttpResponse::Ptr HttpConnection::recvResponse()
 {
     auto parser      = std::make_shared<http::HttpResponseParser>();
     auto buffer_size = m_buffer_size;
-    std::shared_ptr<char> buffer(new char[buffer_size](), [](char *ptr) {
+    std::shared_ptr<char> buffer(new char[buffer_size + 1](), [](char *ptr) {
         delete[] ptr;
         ptr = nullptr;
     });
-    auto data     = buffer.get();
-    size_t offset = 0;
+    auto data      = buffer.get();
+    ssize_t offset = 0;
+
     do
     {
         ssize_t len = read(data + offset, buffer_size - offset);
         if (len <= 0)
         {
+            close();
             return nullptr;
         }
         len += offset;
-        auto ret = parser->execute(data, len);
+        data[len] = '\0';
+
+        size_t nparse = parser->execute(data, len, false);
         if (parser->error())
         {
+            close();
             return nullptr;
         }
-        offset = len - ret;
-        if (offset == buffer_size)
+        offset = len - nparse;
+        if (offset == (ssize_t)buffer_size)
         {
+            close();
             return nullptr;
         }
         if (parser->finished())
@@ -44,44 +50,102 @@ http::HttpResponse::Ptr HttpConnection::recvResponse()
             break;
         }
     } while (true);
-    auto http_parser = parser->getParser();
+
+    auto &http_parser = parser->getParser();
+    std::string body;
+
     if (http_parser.chunked)
     {
+        ssize_t len = offset;
         do
         {
+            bool begin = true;
+            do
+            {
+                if (!begin || len == 0)
+                {
+                    auto rt = read(data + len, buffer_size - len);
+                    if (rt <= 0)
+                    {
+                        close();
+                        return nullptr;
+                    }
+                    len += rt;
+                }
+                data[len]     = '\0';
+                size_t nparse = parser->execute(data, len, true);
+                if (parser->error())
+                {
+                    close();
+                    return nullptr;
+                }
+                len -= nparse;
+                if (len == (ssize_t)buffer_size)
+                {
+                    close();
+                    return nullptr;
+                }
+                begin = false;
+            } while (!parser->finished());
 
-        } while (http_parser.chunks_done);
+            if (http_parser.content_len + 2 <= len)
+            {
+                body.append(data, http_parser.content_len);
+                memmove(data, data + http_parser.content_len + 2,
+                        len - http_parser.content_len - 2);
+                len -= http_parser.content_len + 2;
+            }
+            else
+            {
+                body.append(data, len);
+                int left = http_parser.content_len - len + 2;
+                while (left > 0)
+                {
+                    int rt = read(data, left > (int)buffer_size ? (int)buffer_size : left);
+                    if (rt <= 0)
+                    {
+                        close();
+                        return nullptr;
+                    }
+                    body.append(data, rt);
+                    left -= rt;
+                }
+                body.resize(body.size() - 2); // 去掉最后的 CRLF
+                len = 0;
+            }
+        } while (!http_parser.chunks_done);
     }
     else
     {
-        int64_t content_len = parser->getContentLength();
-        if (content_len > 0)
+        int64_t length = parser->getContentLength();
+        if (length > 0)
         {
-            std::string body;
-            body.resize(content_len);
+            body.resize(length);
             ssize_t len = 0;
-            if (content_len >= offset)
+            if (length >= offset)
             {
                 memcpy(&body[0], data, offset);
                 len = offset;
             }
             else
             {
-                memcpy(&body[0], data, content_len);
-                len = content_len;
+                memcpy(&body[0], data, length);
+                len = length;
             }
-            content_len -= offset;
-            if (content_len > 0)
+            length -= offset;
+            if (length > 0)
             {
-                if (readF(&body[len], content_len) <= 0)
+                if (readF(&body[len], length) <= 0)
                 {
+                    close();
                     return nullptr;
                 }
             }
-            parser->getData()->setBody(body);
         }
     }
 
+    // 设置 body
+    parser->getData()->setBody(body);
     return std::static_pointer_cast<http::HttpResponse>(parser->getData());
 }
 

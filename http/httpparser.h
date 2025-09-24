@@ -23,10 +23,10 @@ class HttpParser
 {
   public:
     HttpParser();
-    virtual ~HttpParser()                          = default;
-    virtual size_t execute(char *data, size_t len) = 0;
-    virtual int32_t finished()                     = 0;
-    virtual int32_t error()                        = 0;
+    virtual ~HttpParser()                                               = default;
+    virtual ssize_t execute(char *data, size_t len, bool chunk = false) = 0;
+    virtual int32_t finished()                                          = 0;
+    virtual int32_t error()                                             = 0;
     HttpMessage::Ptr parse(char *data, size_t len);
     size_t getContentLength() const;
     void setError(int32_t error);
@@ -50,7 +50,7 @@ class HttpRequestParser : public HttpParser
      * @return size_t 实际解析了多少，-1表示出错, 1表示成功,
      * >0表示已处理的字节数
      */
-    size_t execute(char *data, size_t len) override;
+    ssize_t execute(char *data, size_t len, bool chunk = false) override;
     int32_t finished() override;
     int32_t error() override;
     const http_parser &getParser() const;
@@ -84,7 +84,7 @@ class HttpResponseParser : public HttpParser
      * @return size_t 实际解析了多少，-1表示出错, 1表示成功,
      * >0表示已处理的字节数
      */
-    size_t execute(char *data, size_t len) override;
+    ssize_t execute(char *data, size_t len, bool chunk = false) override;
     int32_t finished() override;
     int32_t error() override;
     const httpclient_parser &getParser() const;

@@ -59,7 +59,7 @@ void HttpRequest::delParam(const std::string &key) { m_params.erase(key); }
 std::ostream &HttpRequest::toString(std::ostream &os) const
 {
     os << HttpMethodConverter::toString(m_method) << " " << (m_path.empty() ? "/" : m_path)
-       << (m_query.empty() ? "" : "?") << m_query << (m_query.empty() ? "" : "#") << m_fragment
+       << (m_query.empty() ? "" : "?") << m_query << (m_fragment.empty() ? "" : "#") << m_fragment
        << " HTTP/" << (uint32_t)(m_version >> 4) << "." << (uint32_t)(m_version & 0xF) << "\r\n";
     os << "Connection: " << (m_close ? "Close" : "Keep-Alive") << "\r\n";
     for (const auto &header : m_headers)

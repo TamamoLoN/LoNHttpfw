@@ -54,10 +54,10 @@ HttpRequestParser::HttpRequestParser() : HttpParser()
 
 HttpRequestParser::~HttpRequestParser() { http_parser_finish(&m_parser); }
 
-size_t HttpRequestParser::execute(char *data, size_t len)
+ssize_t HttpRequestParser::execute(char *data, size_t len, bool chunk)
 {
     // ret: 实际解析了多少，-1表示出错
-    size_t ret = http_parser_execute(&m_parser, data, len, 0);
+    ssize_t ret = http_parser_execute(&m_parser, data, len, 0);
     memmove((void *)data, data + ret, len - ret);
 
     return ret;
@@ -156,9 +156,13 @@ HttpResponseParser::HttpResponseParser() : HttpParser()
 
 HttpResponseParser::~HttpResponseParser() { httpclient_parser_finish(&m_parser); }
 
-size_t HttpResponseParser::execute(char *data, size_t len)
+ssize_t HttpResponseParser::execute(char *data, size_t len, bool chunk)
 {
-    size_t ret = httpclient_parser_execute(&m_parser, data, len, 0);
+    if (chunk)
+    {
+        httpclient_parser_init(&m_parser);
+    }
+    ssize_t ret = httpclient_parser_execute(&m_parser, data, len, 0);
     memmove((void *)data, data + ret, len - ret);
 
     return ret;

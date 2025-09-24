@@ -26,17 +26,20 @@ http::HttpRequest::Ptr HttpSession::recvRequest()
         ssize_t len = read(data + offset, buffer_size - offset);
         if (len <= 0)
         {
+            close();
             return nullptr;
         }
         len += offset;
         auto ret = parser->execute(data, len);
         if (parser->error())
         {
+            close();
             return nullptr;
         }
         offset = len - ret;
         if (offset == buffer_size)
         {
+            close();
             return nullptr;
         }
         if (parser->finished())
@@ -65,6 +68,7 @@ http::HttpRequest::Ptr HttpSession::recvRequest()
         {
             if (readF(&body[len], content_len) <= 0)
             {
+                close();
                 return nullptr;
             }
         }
