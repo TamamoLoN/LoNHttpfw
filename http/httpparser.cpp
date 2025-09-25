@@ -136,7 +136,14 @@ void HttpRequestParser::onRequestHttpField(void *data, const char *field, size_t
         // parser->setError((int32_t)HttpParserError::INVALID_FIELD);
         return;
     }
-    parser->m_request->setHeader(std::string(field, flen), std::string(value, vlen));
+    auto key = std::string(field, flen);
+    auto val = std::string(value, vlen);
+    std::cout << "key=" << key << ",val=" << val << std::endl;
+    if (util::toLower(key) == "connection")
+    {
+        parser->m_request->setClose(util::toLower(val) == "close");
+    }
+    parser->m_request->setHeader(key, val);
 }
 
 HttpResponseParser::HttpResponseParser() : HttpParser()
@@ -230,7 +237,13 @@ void HttpResponseParser::onResponseHttpField(void *data, const char *field, size
         // parser->setError((int32_t)HttpParserError::INVALID_FIELD);
         return;
     }
-    parser->m_response->setHeader(std::string(field, flen), std::string(value, vlen));
+    auto key = std::string(field, flen);
+    auto val = std::string(value, vlen);
+    if (util::toLower(key) == "connection")
+    {
+        parser->m_response->setClose(util::toLower(val) == "close");
+    }
+    parser->m_response->setHeader(key, val);
 }
 
 } // namespace http
