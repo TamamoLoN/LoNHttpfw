@@ -26,6 +26,7 @@ http::HttpRequest::Ptr HttpSession::recvRequest()
         ssize_t len = read(data + offset, buffer_size - offset);
         if (len < 0)
         {
+            LON_ERROR(LON_LOG_ROOT) << "recv failed, len=" << len;
             close();
             return nullptr;
         }
@@ -39,12 +40,14 @@ http::HttpRequest::Ptr HttpSession::recvRequest()
         auto ret = parser->execute(data, len);
         if (parser->error())
         {
+            LON_ERROR(LON_LOG_ROOT) << "http parse has error, error=" << parser->error();
             close();
             return nullptr;
         }
         offset = len - ret;
         if (offset == buffer_size)
         {
+            LON_ERROR(LON_LOG_ROOT) << "buffer overflow";
             close();
             return nullptr;
         }
@@ -74,6 +77,7 @@ http::HttpRequest::Ptr HttpSession::recvRequest()
         {
             if (readF(&body[len], content_len) <= 0)
             {
+                LON_ERROR(LON_LOG_ROOT) << "read body failed";
                 close();
                 return nullptr;
             }

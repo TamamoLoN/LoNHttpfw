@@ -22,27 +22,25 @@ void HttpServer::handleClient(const net::Socket::Ptr &client)
     do
     {
         auto request = session->recvRequest();
-        if (!request && session->isEof())
+        if (!request)
         {
-            LON_INFO(LON_LOG_ROOT)
-                << "[" << getName() << "] client disconnected, client=" << client->toString();
-            break;
-        }
-        else
-        {
-            LON_ERROR(LON_LOG_ROOT)
-                << "[" << getName() << "] recv http request failed, errno=" << errno
-                << ", errmsg=" << strerror(errno) << ", client=" << client->toString();
+            if (!session->isEof())
+            {
+                LON_ERROR(LON_LOG_ROOT)
+                    << "[" << getName() << "] recv http request failed, errno=" << errno
+                    << ", errmsg=" << strerror(errno) << ", client=" << client->toString();
+            }
             break;
         }
         auto response = std::make_shared<http::HttpResponse>(request->getVersion(),
                                                              request->isClose() || !m_keepalive);
         m_dispatch->handle(request, response, session);
-        LON_DEBUG(LON_LOG_ROOT) << "[" << getName() << "] recv http request =" << *request;
-        LON_DEBUG(LON_LOG_ROOT) << "[" << getName() << "] send http response=" << *response;
+        // LON_DEBUG(LON_LOG_ROOT) << "[" << getName() << "] recv http request =" << *request;
+        // LON_DEBUG(LON_LOG_ROOT) << "[" << getName() << "] send http response=" << *response;
         session->sendResponse(response);
     } while (m_keepalive);
-
+    LON_INFO(LON_LOG_ROOT) << "[" << getName()
+                           << "] client disconnected, client=" << client->toString();
     session->close();
 }
 
