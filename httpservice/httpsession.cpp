@@ -24,8 +24,14 @@ http::HttpRequest::Ptr HttpSession::recvRequest()
     do
     {
         ssize_t len = read(data + offset, buffer_size - offset);
-        if (len <= 0)
+        if (len < 0)
         {
+            close();
+            return nullptr;
+        }
+        else if (len == 0)
+        {
+            m_eof = true;
             close();
             return nullptr;
         }

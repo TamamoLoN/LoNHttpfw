@@ -13,7 +13,8 @@ HttpServer::HttpServer(scheduler::IOScheduler *scheduler, scheduler::IOScheduler
 
 void HttpServer::handleClient(const net::Socket::Ptr &client)
 {
-    LON_INFO(LON_LOG_ROOT) << "[" << getName() << "] handle client, client=" << client->toString();
+    LON_INFO(LON_LOG_ROOT) << "[" << getName()
+                           << "] handle connected, client=" << client->toString();
     auto session = std::make_shared<HttpSession>(
         client, true,
         http::HttpGlobalConfig::Instance().config_http->getData().request.buffer_size);
@@ -21,7 +22,13 @@ void HttpServer::handleClient(const net::Socket::Ptr &client)
     do
     {
         auto request = session->recvRequest();
-        if (!request)
+        if (!request && session->isEof())
+        {
+            LON_INFO(LON_LOG_ROOT)
+                << "[" << getName() << "] client disconnected, client=" << client->toString();
+            break;
+        }
+        else
         {
             LON_ERROR(LON_LOG_ROOT)
                 << "[" << getName() << "] recv http request failed, errno=" << errno
