@@ -1,9 +1,9 @@
 #pragma once
 
 #include "http/http.h"
-#include "httpserver/httpclient.h"
-#include "httpserver/httpconnection.h"
-#include "httpserver/httpserver.h"
-#include "httpserver/httpservlet.h"
-#include "httpserver/httpsession.h"
+#include "httpservice/httpclient.h"
+#include "httpservice/httpconnection.h"
+#include "httpservice/httpserver.h"
+#include "httpservice/httpservlet.h"
+#include "httpservice/httpsession.h"
 #include "lonetfw/lonetfw.h"

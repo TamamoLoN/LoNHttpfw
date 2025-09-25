@@ -1,8 +1,8 @@
-#include "httpserver/httpservlet.h"
+#include "httpservice/httpservlet.h"
 
 namespace lon
 {
-namespace httpserver
+namespace httpservice
 {
 HttpServlet::HttpServlet(const std::string &name) : m_name(name) {}
 
@@ -163,5 +163,5 @@ HttpServlet404NotFound::HttpServlet404NotFound()
 
 HttpServlet404NotFound::~HttpServlet404NotFound() {}
 
-} // namespace httpserver
+} // namespace httpservice
 } // namespace lon

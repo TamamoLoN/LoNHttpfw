@@ -15,7 +15,7 @@ void test_http_client()
         return;
     }
 
-    auto connection = std::make_shared<lon::httpserver::HttpConnection>(
+    auto connection = std::make_shared<lon::httpservice::HttpConnection>(
         socket, true,
         lon::http::HttpGlobalConfig::Instance().config_http->getData().response.buffer_size);
 
@@ -33,7 +33,7 @@ void test_http_client()
     LON_INFO(LON_LOG_ROOT) << "response=" << response->toString();
     LON_INFO(LON_LOG_ROOT) << "================================";
     auto res =
-        lon::httpserver::HttpClient::request(lon::http::HttpMethod::GET, "http://127.0.0.1", 1000);
+        lon::httpservice::HttpClient::request(lon::http::HttpMethod::GET, "http://127.0.0.1", 1000);
     if (res->result != 0)
     {
         LON_ERROR(LON_LOG_ROOT) << "request failed: " << res->error;

@@ -11,7 +11,7 @@ void test_http_server()
 
     std::vector<lon::net::Address::Ptr> addrs;
     addrs.push_back(addr);
-    auto server = std::make_shared<lon::httpserver::HttpServer>(
+    auto server = std::make_shared<lon::httpservice::HttpServer>(
         lon::scheduler::IOScheduler::getThis(), lon::scheduler::IOScheduler::getThis(),
         lon::config::GlobalConfig::Instance().config_tcp_server_client_timeout->getData(),
         "http_server", false);
@@ -23,9 +23,9 @@ void test_http_server()
     }
     auto dispatch = server->getDispatch();
     dispatch->addServlet(
-        "/", std::make_shared<lon::httpserver::HttpServletFunction>(
+        "/", std::make_shared<lon::httpservice::HttpServletFunction>(
                  [](const lon::http::HttpRequest::Ptr &req, const lon::http::HttpResponse::Ptr &res,
-                    const lon::httpserver::HttpSession::Ptr &session) -> int32_t {
+                    const lon::httpservice::HttpSession::Ptr &session) -> int32_t {
                      const std::string body =
                          "<!DOCTYPE html>\n"
                          "<html>\n"
@@ -61,9 +61,9 @@ void test_http_server()
 
     dispatch->addServlet(
         "/test/test",
-        std::make_shared<lon::httpserver::HttpServletFunction>(
+        std::make_shared<lon::httpservice::HttpServletFunction>(
             [](const lon::http::HttpRequest::Ptr &req, const lon::http::HttpResponse::Ptr &res,
-               const lon::httpserver::HttpSession::Ptr &session) -> int32_t {
+               const lon::httpservice::HttpSession::Ptr &session) -> int32_t {
                 const std::string body = req->toString();
                 res->setStatus(lon::http::HttpStatus::OK);
                 res->setHeader("Content-Type", "text/html");
@@ -73,9 +73,9 @@ void test_http_server()
             "test"));
     dispatch->addGlobServlet(
         "/test/*",
-        std::make_shared<lon::httpserver::HttpServletFunction>(
+        std::make_shared<lon::httpservice::HttpServletFunction>(
             [](const lon::http::HttpRequest::Ptr &req, const lon::http::HttpResponse::Ptr &res,
-               const lon::httpserver::HttpSession::Ptr &session) -> int32_t {
+               const lon::httpservice::HttpSession::Ptr &session) -> int32_t {
                 const std::string body = "test glob\r\n" + req->toString();
                 res->setStatus(lon::http::HttpStatus::OK);
                 res->setHeader("Content-Type", "text/html");

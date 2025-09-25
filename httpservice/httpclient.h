@@ -1,12 +1,12 @@
 #pragma once
 
-#include "httpserver/httpconnection.h"
-#include "httpserver/httpresult.h"
+#include "httpservice/httpconnection.h"
+#include "httpservice/httpresult.h"
 #include "net/uri.h"
 
 namespace lon
 {
-namespace httpserver
+namespace httpservice
 {
 class HttpClient
 {
@@ -24,5 +24,5 @@ class HttpClient
     static HttpResult::Ptr request(const http::HttpRequest::Ptr &req, const net::Uri::Ptr &uri,
                                    uint64_t timeout_ms);
 };
-} // namespace httpserver
+} // namespace httpservice
 } // namespace lon

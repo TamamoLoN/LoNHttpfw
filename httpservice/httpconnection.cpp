@@ -1,8 +1,8 @@
-#include "httpserver/httpconnection.h"
+#include "httpservice/httpconnection.h"
 
 namespace lon
 {
-namespace httpserver
+namespace httpservice
 {
 HttpConnection::HttpConnection(const net::Socket::Ptr &socket, bool proxy, size_t buffer_size)
     : net::SocketStream(socket, proxy), m_buffer_size(buffer_size)
@@ -156,5 +156,5 @@ ssize_t HttpConnection::sendRequest(const http::HttpRequest::Ptr &request)
     auto str = ss.str();
     return writeF(str.c_str(), str.size());
 }
-} // namespace httpserver
+} // namespace httpservice
 } // namespace lon

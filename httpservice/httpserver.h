@@ -1,12 +1,12 @@
 #pragma once
 
-#include "httpserver/httpservlet.h"
-#include "httpserver/httpsession.h"
+#include "httpservice/httpservlet.h"
+#include "httpservice/httpsession.h"
 #include "server/tcpserver.h"
 
 namespace lon
 {
-namespace httpserver
+namespace httpservice
 {
 class HttpServer : public server::TcpServer
 {
@@ -25,5 +25,5 @@ class HttpServer : public server::TcpServer
     bool m_keepalive;
     HttpServletDispatch::Ptr m_dispatch;
 };
-} // namespace httpserver
+} // namespace httpservice
 } // namespace lon

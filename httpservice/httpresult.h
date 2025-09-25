@@ -5,7 +5,7 @@
 
 namespace lon
 {
-namespace httpserver
+namespace httpservice
 {
 struct HttpResult
 {
@@ -27,5 +27,5 @@ struct HttpResult
     http::HttpResponse::Ptr response;
     std::string error;
 };
-} // namespace httpserver
+} // namespace httpservice
 } // namespace lon

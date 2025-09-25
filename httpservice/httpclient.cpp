@@ -1,8 +1,8 @@
-#include "httpserver/httpclient.h"
+#include "httpservice/httpclient.h"
 
 namespace lon
 {
-namespace httpserver
+namespace httpservice
 {
 HttpResult::Ptr HttpClient::request(http::HttpMethod method, const std::string &url,
                                     uint64_t timeout_ms, const http::HttpRequest::MapType &headers,
@@ -98,5 +98,5 @@ HttpResult::Ptr HttpClient::request(const http::HttpRequest::Ptr &req, const net
     return std::make_shared<HttpResult>((int32_t)HttpResult::Error::OK, response, "");
 }
 
-} // namespace httpserver
+} // namespace httpservice
 } // namespace lon

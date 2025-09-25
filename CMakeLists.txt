@@ -25,7 +25,7 @@ ${MONGREL2_HTTP_PARSER}/
 
 file(GLOB HTTP_SOURCES 
 http/*.cpp
-httpserver/*.cpp
+httpservice/*.cpp
 ${MONGREL2_HTTP_PARSER}/*.cpp
 ${MONGREL2_HTTP_PARSER}/*.c
 )
@@ -65,7 +65,7 @@ install(TARGETS lonhttpfw
 
 install(DIRECTORY 
         http
-        httpserver
+        httpservice
         lonhttpfw
         DESTINATION include
         FILES_MATCHING

@@ -2,13 +2,13 @@
 
 #include "http/httprequest.h"
 #include "http/httpresponse.h"
-#include "httpserver/httpsession.h"
+#include "httpservice/httpsession.h"
 #include "thread/mutex.h"
 #include <fnmatch.h>
 
 namespace lon
 {
-namespace httpserver
+namespace httpservice
 {
 class HttpServlet
 {
@@ -92,5 +92,5 @@ class HttpServletDispatch : public HttpServlet
     MutexType m_mutex;
 };
 
-} // namespace httpserver
+} // namespace httpservice
 } // namespace lon

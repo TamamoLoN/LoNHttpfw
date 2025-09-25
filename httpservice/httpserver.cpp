@@ -1,8 +1,8 @@
-#include "httpserver/httpserver.h"
+#include "httpservice/httpserver.h"
 
 namespace lon
 {
-namespace httpserver
+namespace httpservice
 {
 HttpServer::HttpServer(scheduler::IOScheduler *scheduler, scheduler::IOScheduler *accept_scheduler,
                        size_t client_timeout, const std::string &name, bool keepalive)
@@ -43,5 +43,5 @@ void HttpServer::setDispatch(const HttpServletDispatch::Ptr &dispatch) { m_dispa
 
 HttpServletDispatch::Ptr HttpServer::getDispatch() { return m_dispatch; }
 
-} // namespace httpserver
+} // namespace httpservice
 } // namespace lon

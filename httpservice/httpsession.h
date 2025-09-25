@@ -7,7 +7,7 @@
 
 namespace lon
 {
-namespace httpserver
+namespace httpservice
 {
 class HttpSession : public net::SocketStream
 {
@@ -22,5 +22,5 @@ class HttpSession : public net::SocketStream
   private:
     size_t m_buffer_size;
 };
-} // namespace httpserver
+} // namespace httpservice
 } // namespace lon
