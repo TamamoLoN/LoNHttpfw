@@ -56,6 +56,7 @@ if(BUILT_TESTS)
     add_lonhttpfw_build_target(test_http_server)
     add_lonhttpfw_build_target(test_http_client)
     add_lonhttpfw_build_target(test_http_uri)
+    add_lonhttpfw_build_target(test_http_connectionpool)
 endif()
 
 install(TARGETS lonhttpfw

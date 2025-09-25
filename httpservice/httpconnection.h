@@ -18,9 +18,26 @@ class HttpConnection : public net::SocketStream
     using Ptr = std::shared_ptr<HttpConnection>;
     HttpConnection(const net::Socket::Ptr &socket, bool proxy = true, size_t buffer_size = 4096);
     virtual ~HttpConnection();
+    const uint64_t getCreateTimeMs() const;
 
     http::HttpResponse::Ptr recvResponse();
     ssize_t sendRequest(const http::HttpRequest::Ptr &request);
+
+    static HttpResult::Ptr get(const std::string &url, uint64_t timeout_ms,
+                               const http::HttpRequest::MapType &headers = {},
+                               const std::string &body                   = "");
+
+    static HttpResult::Ptr get(const net::Uri::Ptr &uri, uint64_t timeout_ms,
+                               const http::HttpRequest::MapType &headers = {},
+                               const std::string &body                   = "");
+
+    static HttpResult::Ptr post(const std::string &url, uint64_t timeout_ms,
+                                const http::HttpRequest::MapType &headers = {},
+                                const std::string &body                   = "");
+
+    static HttpResult::Ptr post(const net::Uri::Ptr &uri, uint64_t timeout_ms,
+                                const http::HttpRequest::MapType &headers = {},
+                                const std::string &body                   = "");
 
     static HttpResult::Ptr request(http::HttpMethod method, const std::string &url,
                                    uint64_t timeout_ms,
@@ -37,6 +54,7 @@ class HttpConnection : public net::SocketStream
 
   private:
     size_t m_buffer_size;
+    uint64_t m_create_time_ms;
 };
 
 class HttpConnectionPool
@@ -45,9 +63,41 @@ class HttpConnectionPool
     using Ptr       = std::shared_ptr<HttpConnectionPool>;
     using MutexType = thread::Mutex;
     HttpConnectionPool(const std::string &host, const std::string &vhost, in_port_t port,
-                       uint32_t max_size, uint32_t max_alive_time, uint32_t max_request_count);
+                       uint32_t max_size, uint32_t max_alive_time, uint32_t max_request_count,
+                       bool keepalive = true, size_t buffer_size = 4096);
+    ~HttpConnectionPool();
 
     HttpConnection::Ptr getConnection();
+    size_t size() const;
+
+    HttpResult::Ptr get(const std::string &url, uint64_t timeout_ms,
+                        const http::HttpRequest::MapType &headers = {},
+                        const std::string &body                   = "");
+
+    HttpResult::Ptr get(const net::Uri::Ptr &uri, uint64_t timeout_ms,
+                        const http::HttpRequest::MapType &headers = {},
+                        const std::string &body                   = "");
+
+    HttpResult::Ptr post(const std::string &url, uint64_t timeout_ms,
+                         const http::HttpRequest::MapType &headers = {},
+                         const std::string &body                   = "");
+
+    HttpResult::Ptr post(const net::Uri::Ptr &uri, uint64_t timeout_ms,
+                         const http::HttpRequest::MapType &headers = {},
+                         const std::string &body                   = "");
+
+    HttpResult::Ptr request(http::HttpMethod method, const std::string &url, uint64_t timeout_ms,
+                            const http::HttpRequest::MapType &headers = {},
+                            const std::string &body                   = "");
+
+    HttpResult::Ptr request(http::HttpMethod method, const net::Uri::Ptr &uri, uint64_t timeout_ms,
+                            const http::HttpRequest::MapType &headers = {},
+                            const std::string &body                   = "");
+
+    HttpResult::Ptr request(const http::HttpRequest::Ptr &req, uint64_t timeout_ms);
+
+  private:
+    static void releaseConnection(HttpConnection *connection, HttpConnectionPool *pool);
 
   private:
     std::string m_host;
@@ -56,6 +106,8 @@ class HttpConnectionPool
     uint32_t m_max_size;
     uint32_t m_max_alive_time;
     uint32_t m_max_request_count;
+    bool m_keepalive;
+    size_t m_buffer_size;
     MutexType m_mutex;
     std::list<HttpConnection *> m_connections;
     std::atomic<uint32_t> m_size;

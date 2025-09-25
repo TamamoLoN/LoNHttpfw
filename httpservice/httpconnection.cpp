@@ -5,11 +5,14 @@ namespace lon
 namespace httpservice
 {
 HttpConnection::HttpConnection(const net::Socket::Ptr &socket, bool proxy, size_t buffer_size)
-    : net::SocketStream(socket, proxy), m_buffer_size(buffer_size)
+    : net::SocketStream(socket, proxy), m_buffer_size(buffer_size),
+      m_create_time_ms(util::getCurrentMs())
 {
 }
 
 HttpConnection::~HttpConnection() {}
+
+const uint64_t HttpConnection::getCreateTimeMs() const { return m_create_time_ms; }
 
 http::HttpResponse::Ptr HttpConnection::recvResponse()
 {
@@ -157,6 +160,34 @@ ssize_t HttpConnection::sendRequest(const http::HttpRequest::Ptr &request)
     return writeF(str.c_str(), str.size());
 }
 
+HttpResult::Ptr HttpConnection::get(const std::string &url, uint64_t timeout_ms,
+                                    const http::HttpRequest::MapType &headers,
+                                    const std::string &body)
+{
+    return request(http::HttpMethod::GET, url, timeout_ms, headers, body);
+}
+
+HttpResult::Ptr HttpConnection::get(const net::Uri::Ptr &uri, uint64_t timeout_ms,
+                                    const http::HttpRequest::MapType &headers,
+                                    const std::string &body)
+{
+    return request(http::HttpMethod::GET, uri, timeout_ms, headers, body);
+}
+
+HttpResult::Ptr HttpConnection::post(const std::string &url, uint64_t timeout_ms,
+                                     const http::HttpRequest::MapType &headers,
+                                     const std::string &body)
+{
+    return request(http::HttpMethod::POST, url, timeout_ms, headers, body);
+}
+
+HttpResult::Ptr HttpConnection::post(const net::Uri::Ptr &uri, uint64_t timeout_ms,
+                                     const http::HttpRequest::MapType &headers,
+                                     const std::string &body)
+{
+    return request(http::HttpMethod::POST, uri, timeout_ms, headers, body);
+}
+
 HttpResult::Ptr HttpConnection::request(http::HttpMethod method, const std::string &url,
                                         uint64_t timeout_ms,
                                         const http::HttpRequest::MapType &headers,
@@ -228,8 +259,10 @@ HttpResult::Ptr HttpConnection::request(const http::HttpRequest::Ptr &req, const
                                             "socket connect failed, error");
     }
     socket->setRecvTimeout(timeout_ms);
-    auto connection = std::make_shared<HttpConnection>(socket);
-    auto ret        = connection->sendRequest(req);
+    auto connection = std::make_shared<HttpConnection>(
+        socket, true,
+        http::HttpGlobalConfig::Instance().config_http->getData().response.buffer_size);
+    auto ret = connection->sendRequest(req);
     if (ret == 0)
     {
         return std::make_shared<HttpResult>((int32_t)HttpResult::Error::SEND_CLOSE_BY_PEER, nullptr,
@@ -251,6 +284,215 @@ HttpResult::Ptr HttpConnection::request(const http::HttpRequest::Ptr &req, const
                 ", timeout ms=" + util::lexical_cast<std::string>(timeout_ms));
     }
     return std::make_shared<HttpResult>((int32_t)HttpResult::Error::OK, response, "");
+}
+
+HttpConnectionPool::HttpConnectionPool(const std::string &host, const std::string &vhost,
+                                       in_port_t port, uint32_t max_size, uint32_t max_alive_time,
+                                       uint32_t max_request_count, bool keepalive,
+                                       size_t buffer_size)
+    : m_host(host), m_vhost(vhost), m_port(port), m_max_size(max_size),
+      m_max_alive_time(max_alive_time), m_max_request_count(max_request_count),
+      m_keepalive(keepalive), m_buffer_size(buffer_size), m_connections({}), m_size({0})
+{
+}
+
+HttpConnectionPool::~HttpConnectionPool() {}
+
+HttpConnection::Ptr HttpConnectionPool::getConnection()
+{
+    auto now_ms = util::getCurrentMs();
+    std::vector<HttpConnection *> invalid_connections;
+    HttpConnection *res = nullptr;
+    MutexType::Lock lock(m_mutex);
+
+    while (!m_connections.empty())
+    {
+        auto connection = *m_connections.begin();
+        m_connections.pop_front();
+        if (!connection->isConnected())
+        {
+            invalid_connections.push_back(connection);
+            continue;
+        }
+        if (connection->getCreateTimeMs() + m_max_alive_time > now_ms)
+        {
+            invalid_connections.push_back(connection);
+            continue;
+        }
+        res = connection;
+        break;
+    }
+    lock.unlock();
+    for (auto &it : invalid_connections)
+    {
+        delete it;
+        it = nullptr;
+    }
+    m_size -= invalid_connections.size();
+    if (!res)
+    {
+        net::Address::Ptr addr = nullptr;
+        bool ret               = net::Address::parse(addr, m_host);
+        if (LON_UNLIKELY(!ret))
+        {
+            LON_ERROR(LON_LOG_ROOT) << "parse host=" << m_host << " failed";
+            return nullptr;
+        }
+        auto socket = net::Socket::create(addr);
+        if (LON_UNLIKELY(!socket))
+        {
+            LON_ERROR(LON_LOG_ROOT) << "create socket failed, addr=" << addr->toString();
+            return nullptr;
+        }
+        if (LON_UNLIKELY(!socket->connect(addr)))
+        {
+            LON_ERROR(LON_LOG_ROOT) << "connect socket failed, addr=" << addr->toString();
+            return nullptr;
+        }
+        res = new HttpConnection(socket, true, m_buffer_size);
+        ++m_size;
+    }
+    return HttpConnection::Ptr(
+        res, std::bind(&HttpConnectionPool::releaseConnection, std::placeholders::_1, this));
+}
+
+size_t HttpConnectionPool::size() const { return m_connections.size(); }
+
+HttpResult::Ptr HttpConnectionPool::get(const std::string &url, uint64_t timeout_ms,
+                                        const http::HttpRequest::MapType &headers,
+                                        const std::string &body)
+{
+    return request(http::HttpMethod::GET, url, timeout_ms, headers, body);
+}
+
+HttpResult::Ptr HttpConnectionPool::get(const net::Uri::Ptr &uri, uint64_t timeout_ms,
+                                        const http::HttpRequest::MapType &headers,
+                                        const std::string &body)
+{
+    return request(http::HttpMethod::GET, uri, timeout_ms, headers, body);
+}
+
+HttpResult::Ptr HttpConnectionPool::post(const std::string &url, uint64_t timeout_ms,
+                                         const http::HttpRequest::MapType &headers,
+                                         const std::string &body)
+{
+    return request(http::HttpMethod::POST, url, timeout_ms, headers, body);
+}
+
+HttpResult::Ptr HttpConnectionPool::post(const net::Uri::Ptr &uri, uint64_t timeout_ms,
+                                         const http::HttpRequest::MapType &headers,
+                                         const std::string &body)
+{
+    return request(http::HttpMethod::POST, uri, timeout_ms, headers, body);
+}
+
+HttpResult::Ptr HttpConnectionPool::request(http::HttpMethod method, const std::string &url,
+                                            uint64_t timeout_ms,
+                                            const http::HttpRequest::MapType &headers,
+                                            const std::string &body)
+{
+    auto req = std::make_shared<http::HttpRequest>();
+    req->setMethod(method);
+    req->setPath(url);
+    req->setClose(!m_keepalive);
+    bool has_hosts = false;
+    for (auto &header : headers)
+    {
+        if (util::toLower(header.first) == "connection")
+        {
+            if (util::toLower(header.second) == "keep-alive")
+            {
+                req->setClose(false);
+            }
+            continue;
+        }
+        if (!has_hosts && util::toLower(header.first) == "host")
+        {
+            has_hosts = !header.second.empty();
+        }
+        req->setHeader(header.first, header.second);
+    }
+    if (!has_hosts)
+    {
+        if (m_vhost.empty())
+        {
+            req->setHeader("Host", m_host);
+        }
+        else
+        {
+            req->setHeader("Host", m_vhost);
+        }
+    }
+    req->setBody(body);
+
+    return request(req, timeout_ms);
+}
+
+HttpResult::Ptr HttpConnectionPool::request(http::HttpMethod method, const net::Uri::Ptr &uri,
+                                            uint64_t timeout_ms,
+                                            const http::HttpRequest::MapType &headers,
+                                            const std::string &body)
+{
+    std::stringstream ss;
+    ss << uri->getPath() << (uri->getQuery().empty() ? "" : "?") << uri->getQuery()
+       << (uri->getFragment().empty() ? "" : "#") << uri->getFragment();
+    return request(method, ss.str(), timeout_ms, headers, body);
+}
+
+HttpResult::Ptr HttpConnectionPool::request(const http::HttpRequest::Ptr &req, uint64_t timeout_ms)
+{
+    auto connection = getConnection();
+    if (!connection)
+    {
+        return std::make_shared<HttpResult>(
+            (int32_t)HttpResult::Error::CONNECTIONPOOL_GET_CONNECTION_FAILED, nullptr,
+            "connectionpool get connection failed, m_host=" + m_host +
+                ", m_port=" + util::lexical_cast<std::string>(m_port));
+    }
+    auto socket = connection->getSocket();
+    if (LON_UNLIKELY(!socket))
+    {
+        return std::make_shared<HttpResult>((int32_t)HttpResult::Error::SOCKET_FAILED, nullptr,
+                                            "socket create failed");
+    }
+    socket->setRecvTimeout(timeout_ms);
+    auto ret = connection->sendRequest(req);
+    if (ret == 0)
+    {
+        return std::make_shared<HttpResult>((int32_t)HttpResult::Error::SEND_CLOSE_BY_PEER, nullptr,
+                                            "send request closed by peer=" +
+                                                socket->getPeerAddress()->toString());
+    }
+    else if (ret < 0)
+    {
+        return std::make_shared<HttpResult>(
+            (int32_t)HttpResult::Error::CONNECTION_FAILED, nullptr,
+            "send request socket error=" + util::lexical_cast<std::string>(socket->getError()) +
+                ", errstr=" + std::string(strerror(socket->getError())));
+    }
+    auto response = connection->recvResponse();
+    if (!response)
+    {
+        return std::make_shared<HttpResult>(
+            (int32_t)HttpResult::Error::RECV_TIMEOUT, nullptr,
+            "recv response timeout=" + socket->getPeerAddress()->toString() +
+                ", timeout ms=" + util::lexical_cast<std::string>(timeout_ms));
+    }
+    return std::make_shared<HttpResult>((int32_t)HttpResult::Error::OK, response, "");
+}
+
+void HttpConnectionPool::releaseConnection(HttpConnection *connection, HttpConnectionPool *pool)
+{
+    if (!connection->isConnected() ||
+        (connection->getCreateTimeMs() + pool->m_max_alive_time >= util::getCurrentMs()))
+    {
+        delete connection;
+        connection = nullptr;
+        --pool->m_size;
+        return;
+    }
+    MutexType::Lock lock(pool->m_mutex);
+    pool->m_connections.push_back(connection);
 }
 
 } // namespace httpservice

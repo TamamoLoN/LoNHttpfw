@@ -20,6 +20,7 @@ struct HttpResult
         SEND_CLOSE_BY_PEER,
         SEND_SOCKET_ERROR,
         RECV_TIMEOUT,
+        CONNECTIONPOOL_GET_CONNECTION_FAILED,
     };
     HttpResult(int32_t result, const http::HttpResponse::Ptr &response, const std::string &error);
 
