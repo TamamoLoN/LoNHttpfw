@@ -1,9 +1,11 @@
 #include "lonhttpfw/lonhttpfw.h"
 
+uint16_t port = 8080;
+
 void test_http_server()
 {
     lon::net::Address::Ptr addr;
-    lon::net::Address::parse(addr, "0.0.0.0:8080", AF_INET);
+    lon::net::Address::parse(addr, "0.0.0.0:" + std::to_string(port), AF_INET);
 
     LON_INFO(LON_LOG_ROOT) << "addr=" << addr->toString();
 
@@ -86,6 +88,12 @@ void test_http_server()
 
 int main(int argc, char const *argv[])
 {
+    if (argc < 2)
+    {
+        std::cout << "usage: " << argv[0] << " <port>" << std::endl;
+        return -1;
+    }
+    port = std::atoi(argv[1]);
     lon::config::Config::parseFromYaml(".config/log.yaml");
     auto ios = std::make_shared<lon::scheduler::IOScheduler>(
         2, true, "io_scheduler", lon::config::GlobalConfig::Instance().config_fiber->getData());

@@ -3,7 +3,7 @@
 void test_http_client()
 {
     lon::net::Address::Ptr addr;
-    lon::net::Address::parse(addr, "0.0.0.0:8080", AF_INET);
+    lon::net::Address::parse(addr, "httpbin.org:80", AF_INET);
 
     LON_INFO(LON_LOG_ROOT) << "addr=" << addr->toString();
 
@@ -20,6 +20,8 @@ void test_http_client()
         lon::http::HttpGlobalConfig::Instance().config_http->getData().response.buffer_size);
 
     auto request = std::make_shared<lon::http::HttpRequest>();
+    request->setPath("/stream/3");
+    request->setHeader("Host", "httpbin.org");
     LON_INFO(LON_LOG_ROOT) << "request=" << request->toString();
     connection->sendRequest(request);
     auto response = connection->recvResponse();
@@ -29,6 +31,15 @@ void test_http_client()
         return;
     }
     LON_INFO(LON_LOG_ROOT) << "response=" << response->toString();
+    LON_INFO(LON_LOG_ROOT) << "================================";
+    auto res =
+        lon::httpserver::HttpClient::request(lon::http::HttpMethod::GET, "http://127.0.0.1", 1000);
+    if (res->result != 0)
+    {
+        LON_ERROR(LON_LOG_ROOT) << "request failed: " << res->error;
+        return;
+    }
+    LON_INFO(LON_LOG_ROOT) << "response=" << res->response->toString();
 }
 
 int main(int argc, char const *argv[])
