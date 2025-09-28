@@ -6,13 +6,15 @@ namespace httpservice
 {
 HttpConnection::HttpConnection(const net::Socket::Ptr &socket, bool proxy, size_t buffer_size)
     : net::SocketStream(socket, proxy), m_buffer_size(buffer_size),
-      m_create_time_ms(util::getCurrentMs())
+      m_create_time_ms(util::getCurrentMs()), m_request_count(0)
 {
 }
 
 HttpConnection::~HttpConnection() {}
 
 const uint64_t HttpConnection::getCreateTimeMs() const { return m_create_time_ms; }
+
+uint64_t &HttpConnection::getRequestCount() { return m_request_count; }
 
 http::HttpResponse::Ptr HttpConnection::recvResponse()
 {
@@ -296,7 +298,15 @@ HttpConnectionPool::HttpConnectionPool(const std::string &host, const std::strin
 {
 }
 
-HttpConnectionPool::~HttpConnectionPool() {}
+HttpConnectionPool::~HttpConnectionPool()
+{
+    MutexType::Lock lock(m_mutex);
+    for (auto &it : m_connections)
+    {
+        delete it;
+        it = nullptr;
+    }
+}
 
 HttpConnection::Ptr HttpConnectionPool::getConnection()
 {
@@ -314,7 +324,7 @@ HttpConnection::Ptr HttpConnectionPool::getConnection()
             invalid_connections.push_back(connection);
             continue;
         }
-        if (connection->getCreateTimeMs() + m_max_alive_time > now_ms)
+        if ((connection->getCreateTimeMs() + m_max_alive_time) < now_ms)
         {
             invalid_connections.push_back(connection);
             continue;
@@ -331,12 +341,16 @@ HttpConnection::Ptr HttpConnectionPool::getConnection()
     m_size -= invalid_connections.size();
     if (!res)
     {
-        net::Address::Ptr addr = nullptr;
-        bool ret               = net::Address::parse(addr, m_host);
+        net::IPAddress::Ptr addr = nullptr;
+        bool ret                 = net::Address::parseIPAddress(addr, m_host);
         if (LON_UNLIKELY(!ret))
         {
             LON_ERROR(LON_LOG_ROOT) << "parse host=" << m_host << " failed";
             return nullptr;
+        }
+        if (!addr->getPort())
+        {
+            addr->setPort(m_port);
         }
         auto socket = net::Socket::create(addr);
         if (LON_UNLIKELY(!socket))
@@ -356,7 +370,7 @@ HttpConnection::Ptr HttpConnectionPool::getConnection()
         res, std::bind(&HttpConnectionPool::releaseConnection, std::placeholders::_1, this));
 }
 
-size_t HttpConnectionPool::size() const { return m_connections.size(); }
+size_t HttpConnectionPool::size() const { return m_size; }
 
 HttpResult::Ptr HttpConnectionPool::get(const std::string &url, uint64_t timeout_ms,
                                         const http::HttpRequest::MapType &headers,
@@ -484,13 +498,15 @@ HttpResult::Ptr HttpConnectionPool::request(const http::HttpRequest::Ptr &req, u
 void HttpConnectionPool::releaseConnection(HttpConnection *connection, HttpConnectionPool *pool)
 {
     if (!connection->isConnected() ||
-        (connection->getCreateTimeMs() + pool->m_max_alive_time >= util::getCurrentMs()))
+        ((connection->getCreateTimeMs() + pool->m_max_alive_time) < util::getCurrentMs()) ||
+        (connection->getRequestCount() >= pool->m_max_request_count))
     {
         delete connection;
         connection = nullptr;
         --pool->m_size;
         return;
     }
+    ++connection->getRequestCount();
     MutexType::Lock lock(pool->m_mutex);
     pool->m_connections.push_back(connection);
 }

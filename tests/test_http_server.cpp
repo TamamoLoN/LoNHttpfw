@@ -14,7 +14,7 @@ void test_http_server()
     auto server = std::make_shared<lon::httpservice::HttpServer>(
         lon::scheduler::IOScheduler::getThis(), lon::scheduler::IOScheduler::getThis(),
         lon::config::GlobalConfig::Instance().config_tcp_server_client_timeout->getData(),
-        "http_server", false);
+        "http_server", true);
     std::vector<lon::net::Address::Ptr> bind_failed_addrs;
     while (!server->bind(addrs, bind_failed_addrs))
     {

@@ -19,6 +19,7 @@ class HttpConnection : public net::SocketStream
     HttpConnection(const net::Socket::Ptr &socket, bool proxy = true, size_t buffer_size = 4096);
     virtual ~HttpConnection();
     const uint64_t getCreateTimeMs() const;
+    uint64_t &getRequestCount();
 
     http::HttpResponse::Ptr recvResponse();
     ssize_t sendRequest(const http::HttpRequest::Ptr &request);
@@ -55,6 +56,7 @@ class HttpConnection : public net::SocketStream
   private:
     size_t m_buffer_size;
     uint64_t m_create_time_ms;
+    uint64_t m_request_count;
 };
 
 class HttpConnectionPool
@@ -62,6 +64,16 @@ class HttpConnectionPool
   public:
     using Ptr       = std::shared_ptr<HttpConnectionPool>;
     using MutexType = thread::Mutex;
+    /**
+     * @param host 例 127.0.0.1:8080
+     * @param vhost
+     * @param port 优先级低于host中的端口号，如果host未指定端口号，则使用此端口号。
+     * @param max_size
+     * @param max_alive_time
+     * @param max_request_count
+     * @param keepalive
+     * @param buffer_size
+     */
     HttpConnectionPool(const std::string &host, const std::string &vhost, in_port_t port,
                        uint32_t max_size, uint32_t max_alive_time, uint32_t max_request_count,
                        bool keepalive = true, size_t buffer_size = 4096);
