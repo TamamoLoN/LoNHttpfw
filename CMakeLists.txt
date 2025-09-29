@@ -10,7 +10,7 @@ set(CMAKE_BUILD_TYPE Debug)
 
 add_definitions(-g -LINUX_X86)
 
-set(CMAKE_CXX_FLAGS "-std=c++11 -Wno-builtin-macro-redefined -Wno-terminate -Wno-deprecated-declarations")
+set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wno-builtin-macro-redefined -Wno-terminate -Wno-deprecated-declarations")
 
 set(MODULARIZATION OFF CACHE BOOL "" FORCE)
 # set(BUILT_TESTS OFF CACHE BOOL "" FORCE)
