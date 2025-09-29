@@ -14,7 +14,7 @@ void test_http_server()
     auto server = std::make_shared<lon::httpservice::HttpServer>(
         lon::scheduler::IOScheduler::getThis(), lon::scheduler::IOScheduler::getThis(),
         lon::config::GlobalConfig::Instance().config_tcp_server_client_timeout->getData(),
-        "http_server", true);
+        "http_server", false);
     std::vector<lon::net::Address::Ptr> bind_failed_addrs;
     while (!server->bind(addrs, bind_failed_addrs))
     {
@@ -96,7 +96,7 @@ int main(int argc, char const *argv[])
     port = std::atoi(argv[1]);
     lon::config::Config::parseFromYaml(".config/log.yaml");
     auto ios = std::make_shared<lon::scheduler::IOScheduler>(
-        2, true, "io_scheduler", lon::config::GlobalConfig::Instance().config_fiber->getData());
+        1, true, "io_scheduler", lon::config::GlobalConfig::Instance().config_fiber->getData());
     ios->schedule(test_http_server);
 
     return 0;

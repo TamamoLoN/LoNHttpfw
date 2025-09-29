@@ -40,7 +40,8 @@ http::HttpRequest::Ptr HttpSession::recvRequest()
         auto ret = parser->execute(data, len);
         if (parser->error())
         {
-            LON_ERROR(LON_LOG_ROOT) << "http parse has error, error=" << parser->error();
+            LON_ERROR(LON_LOG_ROOT) << "http parse has error, error=" << parser->error()
+                                    << "data=" << std::string(data, len);
             close();
             return nullptr;
         }
