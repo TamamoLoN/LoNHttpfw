@@ -66,7 +66,6 @@ void test_http_server()
                const lon::httpservice::HttpSession::Ptr &session) -> int32_t {
                 const std::string body = req->toString();
                 res->setStatus(lon::http::HttpStatus::OK);
-                res->setHeader("Content-Type", "text/html");
                 res->setBody(body);
                 return 0;
             },
@@ -78,11 +77,61 @@ void test_http_server()
                const lon::httpservice::HttpSession::Ptr &session) -> int32_t {
                 const std::string body = "test glob\r\n" + req->toString();
                 res->setStatus(lon::http::HttpStatus::OK);
-                res->setHeader("Content-Type", "text/html");
                 res->setBody(body);
                 return 0;
             },
             "test glob"));
+
+    dispatch->addServlet(
+        "/get/fds",
+        std::make_shared<lon::httpservice::HttpServletFunction>(
+            [](const lon::http::HttpRequest::Ptr &req, const lon::http::HttpResponse::Ptr &res,
+               const lon::httpservice::HttpSession::Ptr &session) -> int32_t {
+                const std::string body = req->toString();
+                res->setStatus(lon::http::HttpStatus::OK);
+                res->setBody("fds: " + lon::util::lexical_cast<std::string>(FDMGR.size()));
+                return 0;
+            },
+            "get fds"));
+
+    dispatch->addServlet(
+        "/get/fibers",
+        std::make_shared<lon::httpservice::HttpServletFunction>(
+            [](const lon::http::HttpRequest::Ptr &req, const lon::http::HttpResponse::Ptr &res,
+               const lon::httpservice::HttpSession::Ptr &session) -> int32_t {
+                const std::string body = req->toString();
+                res->setStatus(lon::http::HttpStatus::OK);
+                res->setBody("fibers: " +
+                             lon::util::lexical_cast<std::string>(lon::fiber::Fiber::getFibers()));
+                return 0;
+            },
+            "get fiber count"));
+
+    dispatch->addServlet(
+        "/get/tasks",
+        std::make_shared<lon::httpservice::HttpServletFunction>(
+            [](const lon::http::HttpRequest::Ptr &req, const lon::http::HttpResponse::Ptr &res,
+               const lon::httpservice::HttpSession::Ptr &session) -> int32_t {
+                const std::string body = req->toString();
+                res->setStatus(lon::http::HttpStatus::OK);
+                res->setBody("tasks: " +
+                             lon::util::lexical_cast<std::string>(
+                                 lon::scheduler::IOScheduler::getThis()->getTaskCount()));
+                return 0;
+            },
+            "get task count"));
+
+    dispatch->addServlet(
+        "/get/config",
+        std::make_shared<lon::httpservice::HttpServletFunction>(
+            [](const lon::http::HttpRequest::Ptr &req, const lon::http::HttpResponse::Ptr &res,
+               const lon::httpservice::HttpSession::Ptr &session) -> int32_t {
+                const std::string body = req->toString();
+                res->setStatus(lon::http::HttpStatus::OK);
+                res->setBody("config:\n" + lon::config::Config::toString());
+                return 0;
+            },
+            "get task count"));
     server->start();
 }
 
