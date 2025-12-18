@@ -7,6 +7,9 @@ namespace lon
 {
 namespace http
 {
+#ifdef _WIN32
+#undef DELETE
+#endif
 /* Request Methods */
 #define HTTP_METHOD_MAP(XX)                                                                        \
     XX(0, DELETE, DELETE)                                                                          \

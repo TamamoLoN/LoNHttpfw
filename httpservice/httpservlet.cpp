@@ -134,7 +134,7 @@ HttpServlet::Ptr HttpServletDispatch::getServlet(const std::string &uri)
     }
     for (auto it = m_glob_servlets.begin(); it != m_glob_servlets.end(); ++it)
     {
-        if (fnmatch(it->first.c_str(), uri.c_str(), 0) == 0)
+        if (util::globMatch(it->first.c_str(), uri.c_str()))
         {
             return it->second;
         }

@@ -8,9 +8,28 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 set(CMAKE_BUILD_TYPE Debug)
 
-add_definitions(-g -LINUX_X86)
-
-set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wno-builtin-macro-redefined -Wno-terminate -Wno-deprecated-declarations")
+if(WIN32)
+    message(STATUS "Building on Windows (MSVC)")
+    add_definitions(/DWIN32 /D_WINDOWS)
+    add_definitions(/D_CRT_SECURE_NO_WARNINGS)
+    add_compile_options(/Zi)
+    include_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/LoNetfw/thirdparty/win32/pthreads-w32/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/LoNetfw/thirdparty/win32/wepoll/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/LoNetfw/thirdparty/minhook/include
+    )
+    link_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/LoNetfw/thirdparty/win32/pthreads-w32/lib/x64
+        ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/LoNetfw/thirdparty/win32/wepoll/lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/LoNetfw/thirdparty/win32/dl/lib
+    )
+    set(LIB_TYPE STATIC)
+else()
+    message(STATUS "Building on Linux")
+    add_definitions(-g -LINUX_X86)
+    set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wno-builtin-macro-redefined -Wno-terminate -Wno-deprecated-declarations")
+    set(LIB_TYPE SHARED)
+endif()
 
 set(MODULARIZATION OFF CACHE BOOL "" FORCE)
 # set(BUILT_TESTS OFF CACHE BOOL "" FORCE)
@@ -31,7 +50,7 @@ ${MONGREL2_HTTP_PARSER}/*.cpp
 ${MONGREL2_HTTP_PARSER}/*.c
 )
 
-add_library(lonhttpfw SHARED ${HTTP_SOURCES}
+add_library(lonhttpfw ${LIB_TYPE} ${HTTP_SOURCES}
 )
 target_link_libraries(lonhttpfw PUBLIC lonetfw)
 if(USE_ABSOLUTE_PATH)
