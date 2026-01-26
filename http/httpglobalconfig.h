@@ -8,18 +8,9 @@ namespace http
 struct HttpRequestResponseConfig
 {
     explicit HttpRequestResponseConfig(size_t buffer_size = 1024 * 4ull,
-                                       size_t body_size   = 1024 * 1024ull)
-        : buffer_size(buffer_size), body_size(body_size)
-    {
-    }
-    bool operator==(const HttpRequestResponseConfig &other) const
-    {
-        return buffer_size == other.buffer_size && body_size == other.body_size;
-    }
-    bool operator<(const HttpRequestResponseConfig &other) const
-    {
-        return buffer_size < other.buffer_size && body_size < other.body_size;
-    }
+                                       size_t body_size   = 1024 * 1024ull);
+    bool operator==(const HttpRequestResponseConfig &other) const;
+    bool operator<(const HttpRequestResponseConfig &other) const;
     size_t buffer_size;
     size_t body_size;
 };
@@ -27,42 +18,22 @@ struct HttpRequestResponseConfig
 struct HttpConfig
 {
     explicit HttpConfig(HttpRequestResponseConfig request  = HttpRequestResponseConfig(),
-                        HttpRequestResponseConfig response = HttpRequestResponseConfig())
-        : request(request), response(response)
-    {
-    }
-    bool operator==(const HttpConfig &other) const
-    {
-        return request == other.request && response == other.response;
-    }
-    bool operator<(const HttpConfig &other) const
-    {
-        return request < other.request && response < other.response;
-    }
+                        HttpRequestResponseConfig response = HttpRequestResponseConfig());
+    bool operator==(const HttpConfig &other) const;
+    bool operator<(const HttpConfig &other) const;
     HttpRequestResponseConfig request;
     HttpRequestResponseConfig response;
 };
 
 struct HttpGlobalConfig
 {
-    explicit HttpGlobalConfig()
-    {
-        config_http = config::Config::setData("http", HttpConfig(), "http config");
-        config_http->addConfigDataChangeCB(
-            [](const HttpConfig &old_data, const HttpConfig &new_data) {
-                LON_INFO(LON_LOG_ROOT) << "on config http data changed";
-            });
-    }
-    static HttpGlobalConfig &Instance()
-    {
-        static HttpGlobalConfig instance;
-        return instance;
-    }
+    explicit HttpGlobalConfig();
+    static HttpGlobalConfig &Instance();
     config::ConfigData<HttpConfig>::Ptr config_http;
 };
 
 //全局变量，使其在main函数之前初始化
-static auto http_global_conifg = HttpGlobalConfig::Instance();
+// static auto http_global_conifg = HttpGlobalConfig::Instance();
 
 } // namespace http
 
