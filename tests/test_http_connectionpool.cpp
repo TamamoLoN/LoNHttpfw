@@ -2,7 +2,7 @@
 
 static int cnt = 0;
 static lon::scheduler::Timer::Ptr timer;
-
+static auto g_logger = LON_LOG_ROOT;
 void test_http_pool()
 {
     auto pool =
@@ -13,12 +13,20 @@ void test_http_pool()
         1000,
         [pool]() {
             auto res = pool->get("/", 300);
-            // LON_INFO(LON_LOG_ROOT) << "res=" << res->response->toString();
-            LON_INFO(LON_LOG_ROOT) << "pool size=" << pool->size();
-            if (++cnt == 5)
+            // LON_INFO(g_logger) << "res=" << res->response->toString();
+            LON_INFO(g_logger) << "pool size=" << pool->size();
+            if (res->result == (int)lon::httpservice::HttpResult::Error::OK)
             {
-                timer->cancel();
+                LON_INFO(g_logger) << "request ok";
             }
+            else
+            {
+                LON_ERROR(g_logger) << "request error=" << res->error;
+            }
+            // if (++cnt == 5)
+            // {
+            //     timer->cancel();
+            // }
         },
         true);
 }

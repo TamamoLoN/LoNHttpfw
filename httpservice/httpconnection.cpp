@@ -4,6 +4,8 @@ namespace lon
 {
 namespace httpservice
 {
+static auto g_logger = LON_LOG_ROOT;
+
 HttpConnection::HttpConnection(const net::Socket::Ptr &socket, bool proxy, size_t buffer_size)
     : net::SocketStream(socket, proxy), m_buffer_size(buffer_size),
       m_create_time_ms(util::getCurrentMs()), m_request_count(0)
@@ -345,7 +347,7 @@ HttpConnection::Ptr HttpConnectionPool::getConnection()
         bool ret                 = net::Address::parseIPAddress(addr, m_host);
         if (LON_UNLIKELY(!ret))
         {
-            LON_ERROR(LON_LOG_ROOT) << "parse host=" << m_host << " failed";
+            LON_ERROR(g_logger) << "parse host=" << m_host << " failed";
             return nullptr;
         }
         if (!addr->getPort())
@@ -355,12 +357,12 @@ HttpConnection::Ptr HttpConnectionPool::getConnection()
         auto socket = net::Socket::create(addr);
         if (LON_UNLIKELY(!socket))
         {
-            LON_ERROR(LON_LOG_ROOT) << "create socket failed, addr=" << addr->toString();
+            LON_ERROR(g_logger) << "create socket failed, addr=" << addr->toString();
             return nullptr;
         }
         if (LON_UNLIKELY(!socket->connect(addr)))
         {
-            LON_ERROR(LON_LOG_ROOT) << "connect socket failed, addr=" << addr->toString();
+            LON_ERROR(g_logger) << "connect socket failed, addr=" << addr->toString();
             return nullptr;
         }
         res = new HttpConnection(socket, true, m_buffer_size);

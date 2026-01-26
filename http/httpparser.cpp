@@ -4,6 +4,8 @@ namespace lon
 {
 namespace http
 {
+static auto g_logger = LON_LOG_ROOT;
+
 HttpParser::HttpParser() : m_error(0) {}
 
 HttpMessage::Ptr HttpParser::parse(char *data, size_t len)
@@ -11,7 +13,7 @@ HttpMessage::Ptr HttpParser::parse(char *data, size_t len)
     size_t ret = execute(data, len);
     if (LON_UNLIKELY(ret == static_cast<size_t>(-1)))
     {
-        LON_ERROR(LON_LOG_ROOT) << "HttpParser::parse error: " << m_error;
+        LON_ERROR(g_logger) << "HttpParser::parse error: " << m_error;
         return nullptr;
     }
     if (LON_LIKELY(ret < len))
@@ -75,7 +77,7 @@ void HttpRequestParser::onRequestMethod(void *data, const char *at, size_t lengt
     auto method = HttpMethodConverter::fromString(at);
     if (method == HttpMethod::UNKNOWN)
     {
-        LON_WARN(LON_LOG_ROOT) << "Unknown HTTP method: " << at;
+        LON_WARN(g_logger) << "Unknown HTTP method: " << at;
         parser->setError((int32_t)HttpParserError::UNKNOWN_METHOD);
         return;
     }
@@ -115,7 +117,7 @@ void HttpRequestParser::onRequestHttpVersion(void *data, const char *at, size_t 
     }
     else
     {
-        LON_WARN(LON_LOG_ROOT) << "Unknown HTTP version: " << at;
+        LON_WARN(g_logger) << "Unknown HTTP version: " << at;
         parser->setError((int32_t)HttpParserError::UNKNOWN_VERSION);
         return;
     }
@@ -132,7 +134,7 @@ void HttpRequestParser::onRequestHttpField(void *data, const char *field, size_t
     auto parser = static_cast<HttpRequestParser *>(data);
     if (flen == 0)
     {
-        LON_WARN(LON_LOG_ROOT) << "Invalid HTTP field: ";
+        LON_WARN(g_logger) << "Invalid HTTP field: ";
         // parser->setError((int32_t)HttpParserError::INVALID_FIELD);
         return;
     }
@@ -193,7 +195,7 @@ void HttpResponseParser::onResponseStatusCode(void *data, const char *at, size_t
     // std::cout << "1111status=" << (int)status << std::endl;
     // if (status == HttpStatus::UNKNOWN)
     // {
-    //     LON_WARN(LON_LOG_ROOT) << "Unknown HTTP status: " << at;
+    //     LON_WARN(g_logger) << "Unknown HTTP status: " << at;
     //     parser->setError((int32_t)HttpParserError::UNKNOWN_STATUS);
     //     return;
     // }
@@ -216,7 +218,7 @@ void HttpResponseParser::onResponseHttpVersion(void *data, const char *at, size_
     }
     else
     {
-        LON_WARN(LON_LOG_ROOT) << "Unknown HTTP version: " << at;
+        LON_WARN(g_logger) << "Unknown HTTP version: " << at;
         parser->setError((int32_t)HttpParserError::UNKNOWN_VERSION);
         return;
     }
@@ -232,7 +234,7 @@ void HttpResponseParser::onResponseHttpField(void *data, const char *field, size
     auto parser = static_cast<HttpResponseParser *>(data);
     if (flen == 0)
     {
-        LON_WARN(LON_LOG_ROOT) << "Invalid HTTP field: ";
+        LON_WARN(g_logger) << "Invalid HTTP field: ";
         // parser->setError((int32_t)HttpParserError::INVALID_FIELD);
         return;
     }

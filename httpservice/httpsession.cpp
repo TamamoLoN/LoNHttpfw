@@ -4,6 +4,8 @@ namespace lon
 {
 namespace httpservice
 {
+static auto g_logger = LON_LOG_ROOT;
+
 HttpSession::HttpSession(const net::Socket::Ptr &socket, bool proxy, size_t buffer_size)
     : net::SocketStream(socket, proxy), m_buffer_size(buffer_size)
 {
@@ -26,7 +28,7 @@ http::HttpRequest::Ptr HttpSession::recvRequest()
         ssize_t len = read(data + offset, buffer_size - offset);
         if (len < 0)
         {
-            LON_ERROR(LON_LOG_ROOT) << "recv failed, len=" << len;
+            LON_ERROR(g_logger) << "recv failed, len=" << len;
             close();
             return nullptr;
         }
@@ -40,15 +42,15 @@ http::HttpRequest::Ptr HttpSession::recvRequest()
         auto ret = parser->execute(data, len);
         if (parser->error())
         {
-            LON_ERROR(LON_LOG_ROOT) << "http parse has error, error=" << parser->error()
-                                    << "data=" << std::string(data, len);
+            LON_ERROR(g_logger) << "http parse has error, error=" << parser->error()
+                                << "data=" << std::string(data, len);
             close();
             return nullptr;
         }
         offset = len - ret;
         if (offset == buffer_size)
         {
-            LON_ERROR(LON_LOG_ROOT) << "buffer overflow";
+            LON_ERROR(g_logger) << "buffer overflow";
             close();
             return nullptr;
         }
@@ -78,7 +80,7 @@ http::HttpRequest::Ptr HttpSession::recvRequest()
         {
             if (readF(&body[len], content_len) <= 0)
             {
-                LON_ERROR(LON_LOG_ROOT) << "read body failed";
+                LON_ERROR(g_logger) << "read body failed";
                 close();
                 return nullptr;
             }

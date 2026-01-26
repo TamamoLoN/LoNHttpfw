@@ -1,4 +1,5 @@
 #include "lonhttpfw/lonhttpfw.h"
+#include <signal.h>
 
 uint16_t port = 8080;
 
@@ -132,6 +133,9 @@ void test_http_server()
                 return 0;
             },
             "get task count"));
+
+    dispatch->addGlobServlet("/download/*",
+                             std::make_shared<lon::httpservice::HttpServletDownload>());
     server->start();
 }
 
@@ -142,6 +146,7 @@ int main(int argc, char const *argv[])
         std::cout << "usage: " << argv[0] << " <port>" << std::endl;
         return -1;
     }
+    signal(SIGPIPE, SIG_IGN);
     port = std::atoi(argv[1]);
     lon::config::Config::parseFromYaml(".config/log.yaml");
     auto ios = std::make_shared<lon::scheduler::IOScheduler>(

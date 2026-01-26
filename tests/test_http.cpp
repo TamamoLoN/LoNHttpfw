@@ -3,6 +3,8 @@
 #include "http/httprequest.h"
 #include "http/httpresponse.h"
 
+static auto g_logger = LON_LOG_ROOT;
+
 std::string test_request()
 {
     std::map<std::string, std::string, lon::util::InsensitiveStringCompare> tests;
@@ -11,18 +13,18 @@ std::string test_request()
     tests["bbb"] = "b";
     tests["B"]   = "B";
     for (auto &test : tests)
-        LON_DEBUG(LON_LOG_ROOT) << test.first << " => " << test.second;
+        LON_DEBUG(g_logger) << test.first << " => " << test.second;
 
     lon::http::HttpRequest request;
-    LON_DEBUG(LON_LOG_ROOT) << lon::http::HttpMethodConverter::toString(lon::http::HttpMethod::GET);
-    LON_DEBUG(LON_LOG_ROOT) << (int)lon::http::HttpMethodConverter::fromString("GET");
+    LON_DEBUG(g_logger) << lon::http::HttpMethodConverter::toString(lon::http::HttpMethod::GET);
+    LON_DEBUG(g_logger) << (int)lon::http::HttpMethodConverter::fromString("GET");
 
     // request.setMethod(lon::http::HttpMethod::GET);
     // request.setPath("/");
     request.setHeader("Host", "117.72.171.212");
     request.setHeader("Connection", "keep-alive");
     request.setBody("hello lon");
-    LON_DEBUG(LON_LOG_ROOT) << request.toString();
+    LON_DEBUG(g_logger) << request.toString();
     return request.toString();
 }
 
@@ -33,7 +35,7 @@ std::string test_response()
     response.setBody("hello lon");
     response.setClose(false);
     response.setStatus(lon::http::HttpStatus::FORBIDDEN);
-    LON_DEBUG(LON_LOG_ROOT) << response.toString();
+    LON_DEBUG(g_logger) << response.toString();
 
     return response.toString();
 }
@@ -43,10 +45,10 @@ void test_request_parser()
     lon::http::HttpRequestParser parser;
     auto text    = test_request();
     auto request = parser.parse(&text[0], text.size());
-    LON_INFO(LON_LOG_ROOT) << "parser status=" << parser.finished() << ", error=" << parser.error()
-                           << ", total_size=" << text.size()
-                           << ", content_length=" << parser.getContentLength();
-    LON_INFO(LON_LOG_ROOT) << request->toString();
+    LON_INFO(g_logger) << "parser status=" << parser.finished() << ", error=" << parser.error()
+                       << ", total_size=" << text.size()
+                       << ", content_length=" << parser.getContentLength();
+    LON_INFO(g_logger) << request->toString();
 }
 
 void test_response_parser()
@@ -62,10 +64,10 @@ void test_response_parser()
            "\r\n"
            "117.72.171.212\r\n";
     auto response = parser.parse(&text[0], text.size());
-    LON_INFO(LON_LOG_ROOT) << "parser status=" << parser.finished() << ", error=" << parser.error()
-                           << ", total_size=" << text.size()
-                           << ", content_length=" << parser.getContentLength();
-    LON_INFO(LON_LOG_ROOT) << response->toString();
+    LON_INFO(g_logger) << "parser status=" << parser.finished() << ", error=" << parser.error()
+                       << ", total_size=" << text.size()
+                       << ", content_length=" << parser.getContentLength();
+    LON_INFO(g_logger) << response->toString();
 }
 
 int main(int argc, char const *argv[])

@@ -41,12 +41,65 @@ class HttpServletFunction : public HttpServlet
     callback m_cb;
 };
 
-class HttpServlet404NotFound : public HttpServletFunction
+class HttpServlet404NotFound : public HttpServlet
 {
   public:
     using Ptr = std::shared_ptr<HttpServlet404NotFound>;
     HttpServlet404NotFound();
     virtual ~HttpServlet404NotFound();
+    int32_t handle(const http::HttpRequest::Ptr &req, const http::HttpResponse::Ptr &res,
+                   const HttpSession::Ptr &session) override;
+};
+
+class HttpServletDownload : public HttpServlet
+{
+  public:
+    /**
+     * 处理Content-Range: bytes=start-end, bytes=-count, bytes=start- 或
+     * bytes=start-end,200-299的请求;
+     * 以及Range: bytes=start-end, bytes=-count, bytes=start- 或
+     * bytes=start-end,200-299的请求
+     */
+    class RangeParser
+    {
+      public:
+        enum class RangeType
+        {
+            RANGE_INVALID = 0, // 格式错误或超出范围
+            RANGE_NORMAL,      // bytes=start-end
+            RANGE_FROM_START,  // bytes=start-
+            RANGE_FROM_END,    // bytes=-count
+        };
+        struct RangeResult
+        {
+            RangeType type;
+            // bytes=start-end ranges[0] = start, ranges[1] = end
+            // bytes=-count ranges[0] = -1, ranges[1] = count
+            // bytes=start- ranges[0] = start, ranges[1] = -1
+            std::vector<size_t> ranges;
+        };
+
+      public:
+        using RangeResultVec = std::vector<RangeResult>;
+        RangeParser(const std::string &header_val);
+        ~RangeParser();
+        RangeResultVec parse();
+
+      private:
+        std::string m_val;
+    };
+    using Ptr = std::shared_ptr<HttpServletDownload>;
+    HttpServletDownload(bool enable_range = true, const std::string &boundary = "boundary");
+    virtual ~HttpServletDownload();
+    int32_t handle(const http::HttpRequest::Ptr &req, const http::HttpResponse::Ptr &res,
+                   const HttpSession::Ptr &session) override;
+
+  private:
+    std::string getFilePath(const std::string &path) const;
+
+  private:
+    std::string m_boundary;
+    bool m_enable_range;
 };
 
 class HttpServletDispatch : public HttpServlet

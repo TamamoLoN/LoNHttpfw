@@ -4,6 +4,8 @@ namespace lon
 {
 namespace httpservice
 {
+static auto g_logger = LON_LOG_ROOT;
+
 HttpServer::HttpServer(scheduler::IOScheduler *scheduler, scheduler::IOScheduler *accept_scheduler,
                        size_t client_timeout, const std::string &name, bool keepalive)
     : TcpServer(scheduler, accept_scheduler, client_timeout, name), m_keepalive(keepalive),
@@ -13,8 +15,7 @@ HttpServer::HttpServer(scheduler::IOScheduler *scheduler, scheduler::IOScheduler
 
 void HttpServer::handleClient(const net::Socket::Ptr &client)
 {
-    LON_INFO(LON_LOG_ROOT) << "[" << getName()
-                           << "] client connected, client=" << client->toString();
+    LON_INFO(g_logger) << "[" << getName() << "] client connected, client=" << client->toString();
     auto session = std::make_shared<HttpSession>(
         client, true,
         http::HttpGlobalConfig::Instance().config_http->getData().request.buffer_size);
@@ -26,7 +27,7 @@ void HttpServer::handleClient(const net::Socket::Ptr &client)
         {
             if (!session->isEof())
             {
-                LON_ERROR(LON_LOG_ROOT)
+                LON_ERROR(g_logger)
                     << "[" << getName() << "] recv http request failed, errno=" << errno
                     << ", errmsg=" << strerror(errno) << ", client=" << client->toString();
             }
@@ -35,17 +36,20 @@ void HttpServer::handleClient(const net::Socket::Ptr &client)
         auto response = std::make_shared<http::HttpResponse>(request->getVersion(),
                                                              request->isClose() || !m_keepalive);
         response->setHeader("Server", getName());
-        m_dispatch->handle(request, response, session);
-        // LON_DEBUG(LON_LOG_ROOT) << "[" << getName() << "] recv http request =" << *request;
-        // LON_DEBUG(LON_LOG_ROOT) << "[" << getName() << "] send http response=" << *response;
+        if (m_dispatch->handle(request, response, session) == -1)
+        {
+            m_dispatch->getDefaultServlet()->handle(request, response, session);
+        }
+        // LON_DEBUG(g_logger) << "[" << getName() << "] recv http request =" << *request;
+        // LON_DEBUG(g_logger) << "[" << getName() << "] send http response=" << *response;
         session->sendResponse(response);
         if (response->isClose())
         {
             break;
         }
     } while (m_keepalive);
-    LON_INFO(LON_LOG_ROOT) << "[" << getName()
-                           << "] client disconnected, client=" << client->toString();
+    LON_INFO(g_logger) << "[" << getName()
+                       << "] client disconnected, client=" << client->toString();
     session->close();
 }
 
