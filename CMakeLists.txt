@@ -79,6 +79,17 @@ if(BUILT_TESTS)
     add_lonhttpfw_build_target(test_http_connectionpool)
 endif()
 
+add_executable(main
+                ${CMAKE_CURRENT_SOURCE_DIR}/samples/main.cpp
+                )
+    target_link_libraries(main PRIVATE 
+                            lonhttpfw
+                        ) 
+if(USE_ABSOLUTE_PATH)
+else()
+    force_redefine_file_macro_for_sources(main)
+endif()
+
 install(TARGETS lonhttpfw
             ARCHIVE DESTINATION lib 
             LIBRARY DESTINATION lib 

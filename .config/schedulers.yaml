@@ -1,0 +1,5 @@
+schedulers:
+    process:
+        thread_count: 3
+    accept:
+        thread_count: 1

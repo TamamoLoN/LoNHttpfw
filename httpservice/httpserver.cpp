@@ -57,5 +57,24 @@ void HttpServer::setDispatch(const HttpServletDispatch::Ptr &dispatch) { m_dispa
 
 HttpServletDispatch::Ptr HttpServer::getDispatch() { return m_dispatch; }
 
+HttpServerRegister::HttpServerRegister()
+{
+    auto &factory = server::ServerFactory::Instance();
+    factory.registerServer("http", [](scheduler::IOScheduler *scheduler,
+                                      scheduler::IOScheduler *accept_scheduler,
+                                      const config::ConfigServer &config_server) {
+        std::cout << (int)config_server.keepalive << std::endl;
+        return std::make_shared<httpservice::HttpServer>(
+            scheduler, accept_scheduler, G_CONFIG.config_tcp_server_client_timeout->getData(),
+            config_server.name, config_server.keepalive);
+    });
+}
+
+HttpServerRegister &HttpServerRegister::Instance()
+{
+    static HttpServerRegister instance;
+    return instance;
+}
+
 } // namespace httpservice
 } // namespace lon

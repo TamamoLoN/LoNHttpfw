@@ -2,6 +2,7 @@
 
 #include "httpservice/httpservlet.h"
 #include "httpservice/httpsession.h"
+#include "server/serverfactory.h"
 #include "server/tcpserver.h"
 
 namespace lon
@@ -25,5 +26,20 @@ class HttpServer : public server::TcpServer
     bool m_keepalive;
     HttpServletDispatch::Ptr m_dispatch;
 };
+
+class HttpServerRegister
+{
+  public:
+    HttpServerRegister(const HttpServerRegister &) = delete;
+    HttpServerRegister &operator=(const HttpServerRegister &) = delete;
+    HttpServerRegister(HttpServerRegister &&)                 = delete;
+    HttpServerRegister &operator=(HttpServerRegister &&) = delete;
+    static HttpServerRegister &Instance();
+
+  private:
+    HttpServerRegister();
+};
+#define REGISTER_HTTPSERVER                                                                        \
+    auto &_REGISTER_HTTPSERVER = lon::httpservice::HttpServerRegister::Instance();
 } // namespace httpservice
 } // namespace lon
