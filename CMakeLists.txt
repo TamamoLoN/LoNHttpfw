@@ -41,6 +41,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/LoNetfw
 ${CMAKE_CURRENT_SOURCE_DIR}
 ${MONGREL2_HTTP_PARSER}/
 ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/LoNetfw/thirdparty/yaml-cpp/include
+${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/LoNetfw/thirdparty/openssl/include
 )
 
 file(GLOB HTTP_SOURCES 

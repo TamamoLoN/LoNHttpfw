@@ -34,10 +34,13 @@ std::ostream &HttpResponse::toString(std::ostream &os) const
        << (uint32_t)m_status << " "
        << (m_reason.empty() ? HttpStatusConverter::toString(m_status) : m_reason) << "\r\n";
 
-    os << "Connection: " << (m_close ? "Close" : "Keep-Alive") << "\r\n";
+    if (!m_is_websocket)
+    {
+        os << "Connection: " << (m_close ? "close" : "keep-alive") << "\r\n";
+    }
     for (const auto &header : m_headers)
     {
-        if (util::toLower(header.first) == "connection")
+        if (!m_is_websocket && util::toLower(header.first) == "connection")
         {
             continue;
         }

@@ -43,6 +43,14 @@ HttpGlobalConfig::HttpGlobalConfig()
     config_http->addConfigDataChangeCB([](const HttpConfig &old_data, const HttpConfig &new_data) {
         LON_INFO(LON_LOG_ROOT) << "on config http data changed";
     });
+
+    config_websocket_message_max_size =
+        config::Config::setData("websocket.message.max_size", (size_t)(1024 * 1024 * 32),
+                                "websocket message max size config");
+    config_websocket_message_max_size->addConfigDataChangeCB(
+        [](const size_t &old_data, const size_t &new_data) {
+            LON_INFO(LON_LOG_ROOT) << "on config websocket message max size data changed";
+        });
 }
 
 HttpGlobalConfig &HttpGlobalConfig::Instance()

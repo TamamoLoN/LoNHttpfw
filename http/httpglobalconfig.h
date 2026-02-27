@@ -30,6 +30,7 @@ struct HttpGlobalConfig
     explicit HttpGlobalConfig();
     static HttpGlobalConfig &Instance();
     config::ConfigData<HttpConfig>::Ptr config_http;
+    config::ConfigData<size_t>::Ptr config_websocket_message_max_size;
 };
 
 //全局变量，使其在main函数之前初始化

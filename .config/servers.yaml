@@ -7,6 +7,6 @@ servers:
     process_scheduler: accept
     type: http
     keepalive: 0
-    ssl: 1
+    ssl: 0
     cert_file: "./server.crt"
     key_file: "./server.key"

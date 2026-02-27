@@ -63,7 +63,6 @@ HttpServerRegister::HttpServerRegister()
     factory.registerServer("http", [](scheduler::IOScheduler *scheduler,
                                       scheduler::IOScheduler *accept_scheduler,
                                       const config::ConfigServer &config_server) {
-        std::cout << (int)config_server.keepalive << std::endl;
         return std::make_shared<httpservice::HttpServer>(
             scheduler, accept_scheduler, G_CONFIG.config_tcp_server_client_timeout->getData(),
             config_server.name, config_server.keepalive);

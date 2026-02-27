@@ -21,12 +21,14 @@ class HttpMessage
     const std::string &getBody() const;
     const MapType &getHeaders() const;
     const MapType &getCookies() const;
+    const bool isWebsocket() const;
 
     void setVersion(uint8_t version);
     void setClose(bool close);
     void setBody(const std::string &body);
     void setHeaders(const MapType &headers);
     void setCookies(const MapType &cookies);
+    void setWebsocket(bool is_websocket);
 
     std::string getHeader(const std::string &key, const std::string &default_value = "");
     std::string getCookie(const std::string &key, const std::string &default_value = "");
@@ -44,7 +46,6 @@ class HttpMessage
     virtual std::string toString() const                   = 0;
     friend std::ostream &operator<<(std::ostream &os, const HttpMessage &msg);
 
-  public:
   public:
     template <typename T>
     bool getCheckHeader(const std::string &key, T &out, const T &default_value = T())
@@ -112,6 +113,7 @@ class HttpMessage
   protected:
     uint8_t m_version;
     bool m_close;
+    bool m_is_websocket;
     std::string m_body;
     MapType m_headers;
     MapType m_cookies;

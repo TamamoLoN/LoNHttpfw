@@ -4,7 +4,10 @@ namespace lon
 {
 namespace http
 {
-HttpMessage::HttpMessage(uint8_t version, bool close) : m_version(version), m_close(close) {}
+HttpMessage::HttpMessage(uint8_t version, bool close)
+    : m_version(version), m_close(close), m_is_websocket(false)
+{
+}
 
 HttpMessage::~HttpMessage() {}
 
@@ -18,6 +21,8 @@ const HttpMessage::MapType &HttpMessage::getHeaders() const { return m_headers; 
 
 const HttpMessage::MapType &HttpMessage::getCookies() const { return m_cookies; }
 
+const bool HttpMessage::isWebsocket() const { return m_is_websocket; }
+
 void HttpMessage::setVersion(uint8_t version) { m_version = version; }
 
 void HttpMessage::setClose(bool close) { m_close = close; }
@@ -27,6 +32,8 @@ void HttpMessage::setBody(const std::string &body) { m_body = body; }
 void HttpMessage::setHeaders(const MapType &headers) { m_headers = headers; }
 
 void HttpMessage::setCookies(const MapType &cookies) { m_cookies = cookies; }
+
+void HttpMessage::setWebsocket(bool is_websocket) { m_is_websocket = is_websocket; }
 
 std::string HttpMessage::getHeader(const std::string &key, const std::string &default_value)
 {
