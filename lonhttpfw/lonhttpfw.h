@@ -1,5 +1,6 @@
 #pragma once
 
+#include "assembly/serverregistry.h"
 #include "http/http.h"
 #include "httpservice/httpclient.h"
 #include "httpservice/httpconnection.h"

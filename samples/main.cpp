@@ -1,6 +1,6 @@
 #include "lonhttpfw/lonhttpfw.h"
 
-REGISTER_HTTPSERVER
+REGISTER_SERVERS
 
 int main(int argc, char *argv[])
 {

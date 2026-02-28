@@ -47,6 +47,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/LoNetfw/thirdparty/openssl/include
 file(GLOB HTTP_SOURCES 
 http/*.cpp
 httpservice/*.cpp
+assembly/*.cpp
 ${MONGREL2_HTTP_PARSER}/*.cpp
 ${MONGREL2_HTTP_PARSER}/*.c
 )
@@ -99,6 +100,7 @@ install(TARGETS lonhttpfw
 install(DIRECTORY 
         http
         httpservice
+        assembly
         lonhttpfw
         DESTINATION include
         FILES_MATCHING
