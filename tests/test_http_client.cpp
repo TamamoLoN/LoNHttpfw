@@ -44,10 +44,21 @@ void test_http_client()
     LON_INFO(g_logger) << "response=" << res->response->toString();
 }
 
+void test_https_client()
+{
+    auto res = lon::httpservice::HttpConnection::get("https://www.baidu.com", 3000);
+    if (res->result != (int)lon::httpservice::HttpResult::Error::OK)
+    {
+        LON_ERROR(g_logger) << "do get failed: " << res->error;
+        return;
+    }
+    LON_INFO(g_logger) << res->response->toString();
+}
+
 int main(int argc, char const *argv[])
 {
     lon::config::Config::parseFromYaml(".config/log.yaml");
     auto ios = std::make_shared<lon::scheduler::IOScheduler>(
         2, true, "io_scheduler", lon::config::GlobalConfig::Instance().config_fiber->getData());
-    ios->schedule(test_http_client);
+    ios->schedule(test_https_client);
 }

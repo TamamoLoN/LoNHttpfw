@@ -5,6 +5,7 @@
 #include "http/httpresponse.h"
 #include "httpservice/httpresult.h"
 #include "net/socketstream.h"
+#include "net/sslsocket.h"
 #include "net/uri.h"
 #include "thread/mutex.h"
 
@@ -74,10 +75,14 @@ class HttpConnectionPool
      * @param keepalive
      * @param buffer_size
      */
-    HttpConnectionPool(const std::string &host, const std::string &vhost, in_port_t port,
+    HttpConnectionPool(const std::string &host, const std::string &vhost, in_port_t port, bool ssl,
                        uint32_t max_size, uint32_t max_alive_time, uint32_t max_request_count,
                        bool keepalive = true, size_t buffer_size = 4096);
     ~HttpConnectionPool();
+
+    static HttpConnectionPool::Ptr create(const std::string &uri, const std::string &vhost,
+                                          uint32_t max_size, uint32_t max_alive_time,
+                                          uint32_t max_request_count, size_t buffer_size = 4096);
 
     HttpConnection::Ptr getConnection();
     size_t size() const;
@@ -119,6 +124,7 @@ class HttpConnectionPool
     uint32_t m_max_alive_time;
     uint32_t m_max_request_count;
     bool m_keepalive;
+    bool m_ssl;
     size_t m_buffer_size;
     MutexType m_mutex;
     std::list<HttpConnection *> m_connections;

@@ -245,13 +245,14 @@ HttpResult::Ptr HttpConnection::request(http::HttpMethod method, const net::Uri:
 HttpResult::Ptr HttpConnection::request(const http::HttpRequest::Ptr &req, const net::Uri::Ptr &uri,
                                         uint64_t timeout_ms)
 {
-    auto addr = uri->create();
+    bool is_https = (uri->getScheme() == "https");
+    auto addr     = uri->create();
     if (!addr)
     {
         return std::make_shared<HttpResult>((int32_t)HttpResult::Error::INVALID_HOST, nullptr,
                                             "invalid host=" + uri->getHost());
     }
-    auto socket = net::Socket::create(addr);
+    auto socket = is_https ? net::SSLSocket::create(addr) : net::Socket::create(addr);
     if (LON_UNLIKELY(!socket))
     {
         return std::make_shared<HttpResult>((int32_t)HttpResult::Error::SOCKET_FAILED, nullptr,
@@ -291,12 +292,13 @@ HttpResult::Ptr HttpConnection::request(const http::HttpRequest::Ptr &req, const
 }
 
 HttpConnectionPool::HttpConnectionPool(const std::string &host, const std::string &vhost,
-                                       in_port_t port, uint32_t max_size, uint32_t max_alive_time,
-                                       uint32_t max_request_count, bool keepalive,
-                                       size_t buffer_size)
-    : m_host(host), m_vhost(vhost), m_port(port), m_max_size(max_size),
-      m_max_alive_time(max_alive_time), m_max_request_count(max_request_count),
-      m_keepalive(keepalive), m_buffer_size(buffer_size), m_connections({}), m_size({0})
+                                       in_port_t port, bool ssl, uint32_t max_size,
+                                       uint32_t max_alive_time, uint32_t max_request_count,
+                                       bool keepalive, size_t buffer_size)
+    : m_host(host), m_vhost(vhost), m_port(port ? port : (ssl ? 443 : 80)), m_ssl(ssl),
+      m_max_size(max_size), m_max_alive_time(max_alive_time),
+      m_max_request_count(max_request_count), m_keepalive(keepalive), m_buffer_size(buffer_size),
+      m_connections({}), m_size({0})
 {
 }
 
@@ -308,6 +310,21 @@ HttpConnectionPool::~HttpConnectionPool()
         delete it;
         it = nullptr;
     }
+}
+
+HttpConnectionPool::Ptr HttpConnectionPool::create(const std::string &uri, const std::string &vhost,
+                                                   uint32_t max_size, uint32_t max_alive_time,
+                                                   uint32_t max_request_count, size_t buffer_size)
+{
+    auto uri_ptr = net::Uri::create(uri);
+    if (!uri_ptr)
+    {
+        LON_ERROR(g_logger) << "invalid uri: " << uri;
+        return nullptr;
+    }
+    return std::make_shared<HttpConnectionPool>(uri_ptr->getHost(), vhost, uri_ptr->getPort(),
+                                                uri_ptr->getScheme() == "https", max_size,
+                                                max_alive_time, max_request_count, buffer_size);
 }
 
 HttpConnection::Ptr HttpConnectionPool::getConnection()
@@ -354,7 +371,7 @@ HttpConnection::Ptr HttpConnectionPool::getConnection()
         {
             addr->setPort(m_port);
         }
-        auto socket = net::Socket::create(addr);
+        auto socket = m_ssl ? net::SSLSocket::create(addr) : net::Socket::create(addr);
         if (LON_UNLIKELY(!socket))
         {
             LON_ERROR(g_logger) << "create socket failed, addr=" << addr->toString();
