@@ -47,6 +47,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/LoNetfw/thirdparty/openssl/include
 file(GLOB HTTP_SOURCES 
 http/*.cpp
 httpservice/*.cpp
+websocket/*.cpp
 assembly/*.cpp
 ${MONGREL2_HTTP_PARSER}/*.cpp
 ${MONGREL2_HTTP_PARSER}/*.c
@@ -79,6 +80,7 @@ if(BUILT_TESTS)
     add_lonhttpfw_build_target(test_http_client)
     add_lonhttpfw_build_target(test_http_uri)
     add_lonhttpfw_build_target(test_http_connectionpool)
+    add_lonhttpfw_build_target(test_ws_server)
 endif()
 
 add_executable(main
@@ -100,6 +102,7 @@ install(TARGETS lonhttpfw
 install(DIRECTORY 
         http
         httpservice
+        websocket
         assembly
         lonhttpfw
         DESTINATION include

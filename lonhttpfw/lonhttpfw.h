@@ -8,3 +8,8 @@
 #include "httpservice/httpservlet.h"
 #include "httpservice/httpsession.h"
 #include "lonetfw/lonetfw.h"
+#include "websocket/websocket.h"
+#include "websocket/wsconnection.h"
+#include "websocket/wsserver.h"
+#include "websocket/wsservlet.h"
+#include "websocket/wssession.h"
