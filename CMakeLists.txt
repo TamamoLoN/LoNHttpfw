@@ -81,6 +81,7 @@ if(BUILT_TESTS)
     add_lonhttpfw_build_target(test_http_uri)
     add_lonhttpfw_build_target(test_http_connectionpool)
     add_lonhttpfw_build_target(test_ws_server)
+    add_lonhttpfw_build_target(test_ws_client)
 endif()
 
 add_executable(main

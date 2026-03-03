@@ -21,6 +21,7 @@ struct HttpResult
         SEND_SOCKET_ERROR,
         RECV_TIMEOUT,
         CONNECTIONPOOL_GET_CONNECTION_FAILED,
+        CUSTOM
     };
     HttpResult(int32_t result, const http::HttpResponse::Ptr &response, const std::string &error);
 

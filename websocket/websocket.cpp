@@ -75,7 +75,7 @@ WSFrameMessage::Ptr WebSocket::recvMessage(util::Stream *stream, bool client)
                 {
                     break;
                 }
-                length = util::byteswapToLittleEndian(read_length);
+                length = util::byteswapOnLittleEndian(read_length);
             }
             else if (ws_head.payload == 127)
             {
@@ -84,13 +84,12 @@ WSFrameMessage::Ptr WebSocket::recvMessage(util::Stream *stream, bool client)
                 {
                     break;
                 }
-                length = util::byteswapToLittleEndian(read_length);
+                length = util::byteswapOnLittleEndian(read_length);
             }
             else
             {
                 length = ws_head.payload;
             }
-
             if ((cur_len + length) >=
                 http::HttpGlobalConfig::Instance().config_websocket_message_max_size->getData())
             {
@@ -174,7 +173,7 @@ int32_t WebSocket::sendMessage(util::Stream *stream, const WSFrameMessage::Ptr &
         if (ws_head.payload == 126)
         {
             uint16_t len = size;
-            len          = util::byteswapToLittleEndian(len);
+            len          = util::byteswapOnLittleEndian(len);
             if (stream->writeF(&len, sizeof(len)) <= 0)
             {
                 break;
@@ -182,7 +181,7 @@ int32_t WebSocket::sendMessage(util::Stream *stream, const WSFrameMessage::Ptr &
         }
         else if (ws_head.payload == 127)
         {
-            uint64_t len = util::byteswapToLittleEndian(size);
+            uint64_t len = util::byteswapOnLittleEndian(size);
             if (stream->writeF(&len, sizeof(len)) <= 0)
             {
                 break;

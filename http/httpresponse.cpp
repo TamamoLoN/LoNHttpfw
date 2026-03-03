@@ -24,8 +24,9 @@ void HttpResponse::setStatus(HttpStatus status)
 
 void HttpResponse::setReason(const std::string &reason)
 {
-    m_reason = reason;
-    m_status = HttpStatusConverter::fromString(m_reason);
+    m_reason    = reason;
+    auto status = HttpStatusConverter::fromString(reason);
+    m_status    = status == HttpStatus::UNKNOWN ? m_status : status;
 }
 
 std::ostream &HttpResponse::toString(std::ostream &os) const
