@@ -8,7 +8,7 @@ namespace lon
 {
 namespace http
 {
-class HttpMessage
+class LON_API HttpMessage
 {
   public:
     using Ptr     = std::shared_ptr<HttpMessage>;
@@ -44,7 +44,7 @@ class HttpMessage
 
     virtual std::ostream &toString(std::ostream &os) const = 0;
     virtual std::string toString() const                   = 0;
-    friend std::ostream &operator<<(std::ostream &os, const HttpMessage &msg);
+    LON_API friend std::ostream &operator<<(std::ostream &os, const HttpMessage &msg);
 
   public:
     template <typename T>

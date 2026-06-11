@@ -1,13 +1,14 @@
 #pragma once
 
 #include "httpservice/httpserver.h"
+#include "websocket/wsserver.h"
 #include "server/serverfactory.h"
 
 namespace lon
 {
 namespace assembly
 {
-class ServerRegistry
+class LON_API ServerRegistry
 {
   public:
     ServerRegistry();

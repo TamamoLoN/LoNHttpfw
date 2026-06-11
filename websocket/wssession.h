@@ -7,7 +7,7 @@ namespace lon
 {
 namespace ws
 {
-class WSSession : public httpservice::HttpSession
+class LON_API WSSession : public httpservice::HttpSession
 {
   public:
     using Ptr = std::shared_ptr<WSSession>;

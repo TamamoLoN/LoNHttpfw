@@ -7,7 +7,7 @@ namespace lon
 {
 namespace ws
 {
-class WSServlet : public httpservice::HttpServlet
+class LON_API WSServlet : public httpservice::HttpServlet
 {
   public:
     using Ptr = std::shared_ptr<WSServlet>;
@@ -23,7 +23,7 @@ class WSServlet : public httpservice::HttpServlet
                            const WSSession::Ptr &session)                                       = 0;
 };
 
-class WSServletFunction : public WSServlet
+class LON_API WSServletFunction : public WSServlet
 {
   public:
     using Ptr = std::shared_ptr<WSServletFunction>;
@@ -50,7 +50,7 @@ class WSServletFunction : public WSServlet
     on_close_cb m_close_cb;
 };
 
-class WSServletDispatch : public httpservice::HttpServletDispatch
+class LON_API WSServletDispatch : public httpservice::HttpServletDispatch
 {
   public:
     using Ptr = std::shared_ptr<WSServletDispatch>;

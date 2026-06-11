@@ -13,7 +13,7 @@ namespace lon
 {
 namespace httpservice
 {
-class HttpConnection : public net::SocketStream
+class LON_API HttpConnection : public net::SocketStream
 {
   public:
     using Ptr = std::shared_ptr<HttpConnection>;
@@ -60,7 +60,7 @@ class HttpConnection : public net::SocketStream
     uint64_t m_request_count;
 };
 
-class HttpConnectionPool
+class LON_API HttpConnectionPool
 {
   public:
     using Ptr       = std::shared_ptr<HttpConnectionPool>;

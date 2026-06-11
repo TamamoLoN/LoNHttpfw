@@ -19,7 +19,7 @@ enum class HttpParserError
     INVALID_FIELD,
 };
 
-class HttpParser
+class LON_API HttpParser
 {
   public:
     HttpParser();
@@ -37,7 +37,7 @@ class HttpParser
     int32_t m_error;
 };
 
-class HttpRequestParser : public HttpParser
+class LON_API HttpRequestParser : public HttpParser
 {
   public:
     using Ptr = std::shared_ptr<HttpRequestParser>;
@@ -71,7 +71,7 @@ class HttpRequestParser : public HttpParser
     http_parser m_parser;
 };
 
-class HttpResponseParser : public HttpParser
+class LON_API HttpResponseParser : public HttpParser
 {
   public:
     using Ptr = std::shared_ptr<HttpResponseParser>;

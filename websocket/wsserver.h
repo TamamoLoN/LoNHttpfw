@@ -7,7 +7,7 @@ namespace lon
 {
 namespace ws
 {
-class WSServer : public server::TcpServer
+class LON_API WSServer : public server::TcpServer
 {
   public:
     using Ptr = std::shared_ptr<WSServer>;

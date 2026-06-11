@@ -7,7 +7,7 @@ namespace lon
 {
 namespace httpservice
 {
-struct HttpResult
+struct LON_API HttpResult
 {
     using Ptr = std::shared_ptr<HttpResult>;
     enum class Error

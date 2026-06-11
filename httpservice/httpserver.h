@@ -9,7 +9,7 @@ namespace lon
 {
 namespace httpservice
 {
-class HttpServer : public server::TcpServer
+class LON_API HttpServer : public server::TcpServer
 {
   public:
     using Ptr = std::shared_ptr<HttpServer>;

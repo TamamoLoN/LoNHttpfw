@@ -9,7 +9,7 @@ namespace lon
 {
 namespace httpservice
 {
-class HttpServlet
+class LON_API HttpServlet
 {
   public:
     using Ptr = std::shared_ptr<HttpServlet>;
@@ -24,7 +24,7 @@ class HttpServlet
     std::string m_name;
 };
 
-class HttpServletFunction : public HttpServlet
+class LON_API HttpServletFunction : public HttpServlet
 {
   public:
     using Ptr = std::shared_ptr<HttpServletFunction>;
@@ -41,7 +41,7 @@ class HttpServletFunction : public HttpServlet
     callback m_cb;
 };
 
-class HttpServlet404NotFound : public HttpServlet
+class LON_API HttpServlet404NotFound : public HttpServlet
 {
   public:
     using Ptr = std::shared_ptr<HttpServlet404NotFound>;
@@ -51,7 +51,7 @@ class HttpServlet404NotFound : public HttpServlet
                    const HttpSession::Ptr &session) override;
 };
 
-class HttpServletDownload : public HttpServlet
+class LON_API HttpServletDownload : public HttpServlet
 {
   public:
     /**
@@ -60,7 +60,7 @@ class HttpServletDownload : public HttpServlet
      * 以及Range: bytes=start-end, bytes=-count, bytes=start- 或
      * bytes=start-end,200-299的请求
      */
-    class RangeParser
+    class LON_API RangeParser
     {
       public:
         enum class RangeType
@@ -102,7 +102,7 @@ class HttpServletDownload : public HttpServlet
     bool m_enable_range;
 };
 
-class HttpServletDispatch : public HttpServlet
+class LON_API HttpServletDispatch : public HttpServlet
 {
   public:
     using Ptr       = std::shared_ptr<HttpServletDispatch>;

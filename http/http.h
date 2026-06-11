@@ -8,7 +8,7 @@ namespace lon
 {
 namespace http
 {
-class Http
+class LON_API Http
 {
   public:
     Http();

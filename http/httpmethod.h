@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/macro.h"
 #include <string.h>
 #include <string>
 
@@ -63,7 +64,7 @@ enum class HttpMethod
         UNKNOWN
 };
 
-class HttpMethodConverter
+class LON_API HttpMethodConverter
 {
   public:
     static HttpMethod fromString(const std::string &method);

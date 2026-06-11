@@ -5,7 +5,7 @@ namespace lon
 {
 namespace http
 {
-struct HttpRequestResponseConfig
+struct LON_API HttpRequestResponseConfig
 {
     explicit HttpRequestResponseConfig(size_t buffer_size = 1024 * 4ull,
                                        size_t body_size   = 1024 * 1024ull);
@@ -15,7 +15,7 @@ struct HttpRequestResponseConfig
     size_t body_size;
 };
 
-struct HttpConfig
+struct LON_API HttpConfig
 {
     explicit HttpConfig(HttpRequestResponseConfig request  = HttpRequestResponseConfig(),
                         HttpRequestResponseConfig response = HttpRequestResponseConfig());
@@ -25,7 +25,7 @@ struct HttpConfig
     HttpRequestResponseConfig response;
 };
 
-struct HttpGlobalConfig
+struct LON_API HttpGlobalConfig
 {
     explicit HttpGlobalConfig();
     static HttpGlobalConfig &Instance();

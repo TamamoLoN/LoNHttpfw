@@ -9,7 +9,7 @@ namespace lon
 {
 namespace httpservice
 {
-class HttpSession : public net::SocketStream
+class LON_API HttpSession : public net::SocketStream
 {
   public:
     using Ptr = std::shared_ptr<HttpSession>;

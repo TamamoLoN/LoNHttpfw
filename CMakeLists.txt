@@ -12,6 +12,7 @@ if(WIN32)
     message(STATUS "Building on Windows (MSVC)")
     add_definitions(/DWIN32 /D_WINDOWS)
     add_definitions(/D_CRT_SECURE_NO_WARNINGS)
+    add_compile_options(/utf-8 /wd4251 /wd4244)
     add_compile_options(/Zi)
     include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/LoNetfw/thirdparty/win32/pthreads-w32/include
@@ -23,7 +24,7 @@ if(WIN32)
         ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/LoNetfw/thirdparty/win32/wepoll/lib
         ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/LoNetfw/thirdparty/win32/dl/lib
     )
-    set(LIB_TYPE STATIC)
+    # set(LIB_TYPE STATIC)
 else()
     message(STATUS "Building on Linux")
     add_definitions(-g -LINUX_X86)

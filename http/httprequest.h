@@ -6,7 +6,7 @@ namespace lon
 {
 namespace http
 {
-class HttpRequest : public HttpMessage
+class LON_API HttpRequest : public HttpMessage
 {
   public:
     using Ptr = std::shared_ptr<HttpRequest>;

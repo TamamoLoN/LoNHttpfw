@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/macro.h"
 #include <string.h>
 #include <string>
 
@@ -77,7 +78,7 @@ enum class HttpStatus
         UNKNOWN
 };
 
-class HttpStatusConverter
+class LON_API HttpStatusConverter
 {
   public:
     static HttpStatus fromString(const std::string &status);

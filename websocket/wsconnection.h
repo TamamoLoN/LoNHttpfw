@@ -7,7 +7,7 @@ namespace lon
 {
 namespace ws
 {
-class WSConnection : public httpservice::HttpConnection
+class LON_API WSConnection : public httpservice::HttpConnection
 {
   public:
     using Ptr = std::shared_ptr<WSConnection>;

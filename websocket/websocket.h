@@ -27,8 +27,35 @@ namespace ws
 |                     Payload Data continued ...                |
 +---------------------------------------------------------------+
 */
+#ifdef _WIN32
+#pragma pack(push, 1)
+struct LON_API WSFrameHead
+{
+    enum OPCODE
+    {
+        CONTINUE   = 0,
+        TEXT_FRAME = 1,
+        BIN_FRAME  = 2,
+        CLOSE      = 8,
+        PING       = 0x9,
+        PONG       = 0xA
+    };
+
+    uint8_t opcode : 4;
+    uint8_t rsv3 : 1;
+    uint8_t rsv2 : 1;
+    uint8_t rsv1 : 1;
+    uint8_t fin : 1;
+
+    uint8_t payload : 7;
+    uint8_t mask : 1;
+
+    std::string toString() const;
+};
+#pragma pack(pop)
+#else
 #pragma pack(1)
-struct WSFrameHead
+struct LON_API WSFrameHead
 {
     enum OPCODE
     {
@@ -56,8 +83,10 @@ struct WSFrameHead
     std::string toString() const;
 };
 #pragma pack()
+#endif
+static_assert(sizeof(WSFrameHead) == 2, "WSFrameHead must be 2 bytes");
 
-class WSFrameMessage
+class LON_API WSFrameMessage
 {
   public:
     using Ptr = std::shared_ptr<WSFrameMessage>;
@@ -74,7 +103,7 @@ class WSFrameMessage
     std::string m_data;
 };
 
-class WebSocket
+class LON_API WebSocket
 {
   public:
     static WSFrameMessage::Ptr recvMessage(util::Stream *stream, bool client);

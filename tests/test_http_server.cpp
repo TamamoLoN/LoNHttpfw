@@ -146,7 +146,11 @@ int main(int argc, char const *argv[])
         std::cout << "usage: " << argv[0] << " <port>" << std::endl;
         return -1;
     }
+#ifdef _WIN32
+// Windows 不需要 SIGPIPE
+#else
     signal(SIGPIPE, SIG_IGN);
+#endif
     port = std::atoi(argv[1]);
     lon::config::Config::parseFromYaml(".config/log.yaml");
     auto ios = std::make_shared<lon::scheduler::IOScheduler>(

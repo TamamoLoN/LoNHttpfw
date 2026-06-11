@@ -4,7 +4,7 @@ REGISTER_SERVERS
 
 int main(int argc, char *argv[])
 {
-    auto &app = lon::system::Application::Instance();
+    lon::system::Application app;
     if (app.init(argc, argv))
     {
         return app.run();
