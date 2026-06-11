@@ -3,8 +3,8 @@
 #include "http/httpglobalconfig.h"
 #include "http/httprequest.h"
 #include "http/httpresponse.h"
-#include "http11_parser.h"
-#include "httpclient_parser.h"
+#include "mongrel2-http11/http11_parser.h"
+#include "mongrel2-http11/httpclient_parser.h"
 
 namespace lon
 {

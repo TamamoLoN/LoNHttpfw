@@ -38,6 +38,7 @@ set(MONGREL2_HTTP_PARSER ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/mongrel2-http11/
 
 add_subdirectory(thirdparty/LoNetfw)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/LoNetfw
+${CMAKE_CURRENT_SOURCE_DIR}/thirdparty
 ${CMAKE_CURRENT_SOURCE_DIR}
 ${MONGREL2_HTTP_PARSER}/
 ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/LoNetfw/thirdparty/yaml-cpp/include
@@ -107,6 +108,14 @@ install(DIRECTORY
         assembly
         lonhttpfw
         DESTINATION include
+        FILES_MATCHING
+        PATTERN "*.h"
+        PATTERN "*.hpp"
+)
+
+install(DIRECTORY
+        ${MONGREL2_HTTP_PARSER}/
+        DESTINATION include/mongrel2-http11
         FILES_MATCHING
         PATTERN "*.h"
         PATTERN "*.hpp"
