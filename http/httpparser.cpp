@@ -140,10 +140,10 @@ void HttpRequestParser::onRequestHttpField(void *data, const char *field, size_t
     }
     auto key = std::string(field, flen);
     auto val = std::string(value, vlen);
-    if (util::toLower(key) == "connection")
-    {
-        parser->m_request->setClose(util::toLower(val) == "close");
-    }
+    // if (util::toLower(key) == "connection")
+    // {
+    //     parser->m_request->setClose(util::toLower(val) == "close");
+    // }
     parser->m_request->setHeader(key, val);
 }
 
@@ -240,10 +240,10 @@ void HttpResponseParser::onResponseHttpField(void *data, const char *field, size
     }
     auto key = std::string(field, flen);
     auto val = std::string(value, vlen);
-    if (util::toLower(key) == "connection")
-    {
-        parser->m_response->setClose(util::toLower(val) == "close");
-    }
+    // if (util::toLower(key) == "connection")
+    // {
+    //     parser->m_response->setClose(util::toLower(val) == "close");
+    // }
     parser->m_response->setHeader(key, val);
 }
 

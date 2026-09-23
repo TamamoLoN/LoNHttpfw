@@ -15,6 +15,7 @@ class LON_API HttpMessage
     using MapType = std::map<std::string, std::string, util::InsensitiveStringCompare>;
     HttpMessage(uint8_t version = 0x11, bool close = true);
     ~HttpMessage();
+    void init();
 
     uint8_t getVersion() const;
     bool isClose() const;
@@ -31,13 +32,13 @@ class LON_API HttpMessage
     void setWebsocket(bool is_websocket);
 
     std::string getHeader(const std::string &key, const std::string &default_value = "");
-    std::string getCookie(const std::string &key, const std::string &default_value = "");
+    virtual std::string getCookie(const std::string &key, const std::string &default_value = "");
 
     void setHeader(const std::string &key, const std::string &value);
     void setCookie(const std::string &key, const std::string &value);
 
     bool hasHeader(const std::string &key, std::string &value) const;
-    bool hasCookie(const std::string &key, std::string &value) const;
+    virtual bool hasCookie(const std::string &key, std::string &value);
 
     void delHeader(const std::string &key);
     void delCookie(const std::string &key);

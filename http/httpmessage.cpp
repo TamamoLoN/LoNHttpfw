@@ -11,6 +11,12 @@ HttpMessage::HttpMessage(uint8_t version, bool close)
 
 HttpMessage::~HttpMessage() {}
 
+void HttpMessage::init()
+{
+    auto conn = getHeader("Connection");
+    setClose(util::toLower(conn) == "keep-alive");
+}
+
 uint8_t HttpMessage::getVersion() const { return m_version; }
 
 bool HttpMessage::isClose() const { return m_close; }
@@ -69,7 +75,7 @@ bool HttpMessage::hasHeader(const std::string &key, std::string &value) const
     return false;
 }
 
-bool HttpMessage::hasCookie(const std::string &key, std::string &value) const
+bool HttpMessage::hasCookie(const std::string &key, std::string &value)
 {
     auto it = m_cookies.find(key);
     if (it != m_cookies.end())

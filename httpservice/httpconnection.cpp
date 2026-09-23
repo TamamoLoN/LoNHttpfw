@@ -153,6 +153,7 @@ http::HttpResponse::Ptr HttpConnection::recvResponse()
 
     // 设置 body
     parser->getData()->setBody(body);
+    parser->getData()->init();
     return std::static_pointer_cast<http::HttpResponse>(parser->getData());
 }
 

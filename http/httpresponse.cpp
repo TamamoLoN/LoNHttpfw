@@ -29,6 +29,36 @@ void HttpResponse::setReason(const std::string &reason)
     m_status    = status == HttpStatus::UNKNOWN ? m_status : status;
 }
 
+void HttpResponse::setRedirect(const std::string &uri)
+{
+    m_status = HttpStatus::FOUND;
+    setHeader("Location", uri);
+}
+
+void HttpResponse::setCookie(const std::string &key, const std::string &val, time_t expired,
+                             const std::string &path, const std::string &domain, bool secure)
+{
+    std::stringstream ss;
+    ss << key << "=" << val;
+    if (expired > 0)
+    {
+        ss << ";expires=" << util::time2Str(expired, "%a, %d %b %Y %H:%M:%S") << " GMT";
+    }
+    if (!domain.empty())
+    {
+        ss << ";domain=" << domain;
+    }
+    if (!path.empty())
+    {
+        ss << ";path=" << path;
+    }
+    if (secure)
+    {
+        ss << ";secure";
+    }
+    setCookie(key, ss.str());
+}
+
 std::ostream &HttpResponse::toString(std::ostream &os) const
 {
     os << "HTTP/" << (uint32_t)(m_version >> 4) << "." << (uint32_t)(m_version & 0x0F) << " "

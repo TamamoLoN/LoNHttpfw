@@ -30,9 +30,12 @@ class LON_API HttpRequest : public HttpMessage
 
     void setParam(const std::string &key, const std::string &value);
 
-    bool hasParam(const std::string &key, std::string &value) const;
+    bool hasParam(const std::string &key, std::string &value);
 
     void delParam(const std::string &key);
+
+    std::string getCookie(const std::string &key, const std::string &default_value = "") override;
+    bool hasCookie(const std::string &key, std::string &value) override;
 
     /**
      * @brief 将HttpRequest对象转换为字符串
@@ -59,6 +62,12 @@ class LON_API HttpRequest : public HttpMessage
     }
 
   private:
+    void initParam();
+    void initQueryParam();
+    void initBodyParam();
+    void initCookies();
+
+  private:
     HttpMethod m_method;
 
     // uri: http://www.example.com:80/path?id=10&v=20#fr
@@ -71,6 +80,7 @@ class LON_API HttpRequest : public HttpMessage
     std::string m_query;
     std::string m_fragment;
     MapType m_params;
+    uint8_t m_parser_param_flag;
 };
 } // namespace http
 } // namespace lon

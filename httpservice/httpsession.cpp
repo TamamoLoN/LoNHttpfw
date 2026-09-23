@@ -87,6 +87,7 @@ http::HttpRequest::Ptr HttpSession::recvRequest()
         }
         parser->getData()->setBody(body);
     }
+    parser->getData()->init();
     return std::static_pointer_cast<http::HttpRequest>(parser->getData());
 }
 

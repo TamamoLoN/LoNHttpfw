@@ -19,6 +19,11 @@ class LON_API HttpResponse : public HttpMessage
     void setStatus(HttpStatus status);
     void setReason(const std::string &reason);
 
+    void setRedirect(const std::string &uri);
+    void setCookie(const std::string &key, const std::string &val, time_t expired = 0,
+                   const std::string &path = "", const std::string &domain = "",
+                   bool secure = false);
+
     /**
      * @brief 将HttpResponse对象转换为字符串
      * @param os 输出流
